@@ -9,5 +9,4 @@ import { NavbarComponent } from '../navbar/navbar.component';
   styleUrl: './calendar-menu.component.scss'
 })
 export class CalendarMenuComponent {
-
 }

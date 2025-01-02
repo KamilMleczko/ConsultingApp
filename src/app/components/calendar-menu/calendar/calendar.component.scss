@@ -2,38 +2,30 @@
 
 .calendar {
     border-radius: 10px;
-    max-width: 250px;
+    width: 220px;
     margin: 20px auto;
     border: 1px solid #ddd;
     
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.calendar-header .current-date {
-    
-    color: #fff;
-    text-align: center;
-    padding: 10px;
-    font-size: 1.25rem;
-    border-radius: 5%;
-}
+
 .calendar-header {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    
     background-color: #374d63;
     display: flex;
     justify-content: center;
-    align-content: space-around;
+    align-content: space-between;
     flex-direction: row;
     align-items: center;
+    padding: 10px;
 }
 .calendar-header i{
     color: #ffffff;
     padding: 10px;
     margin: 10px;
     border-radius: 50%;
-    
 }
 .calendar-header i:hover{
     background-color: #0a58d4cb;
@@ -69,4 +61,20 @@
 .calendar-days .today {
     background-color: #e9f7fe;
     border: 2px solid #007bff;
+}
+.date-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+  }
+
+.date-container .current-date {
+    
+    color: #fff;
+    text-align: center;
+
+    font-size: 1.25rem;
+    border-radius: 5%;
 }

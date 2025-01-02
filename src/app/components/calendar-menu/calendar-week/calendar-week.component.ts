@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, input, OnChanges, OnInit , SimpleChanges} from '@angular/core';
 
 interface TimeSlot {
   time: string;
@@ -26,6 +26,7 @@ export class CalendarWeekComponent implements OnInit {
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timeSlots: TimeSlot[] = [];
   currentDate: Date = new Date();
+
   ngOnInit(): void {
     this.generateTimeSlots();
   }
