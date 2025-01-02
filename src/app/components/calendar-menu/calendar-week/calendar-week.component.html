@@ -1,0 +1,32 @@
+<div class="calendar-container">
+  
+  <div class="time-slots">
+    <table class="calendar-table">
+      <thead class="sticky-header">
+        <tr>
+          <th class="time-cell"></th>
+          <th *ngFor="let day of weekDays; let i = index" class="header-cell">
+            {{ day }}
+            <div class="date-info">
+              <span class="date-number">{{ getDayDate(i) }}</span>
+              <span class="appointment-count">booked({{ getAppointmentCount(i) }})</span>
+            </div>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let slot of timeSlots">
+          <td class="time-cell"> 
+            <span class="time-label" *ngIf="slot.displayTime">{{ slot.time }}</span>
+          </td>
+          <td *ngFor="let daySlot of slot.daySlots" 
+              class="calendar-cell"
+              [attr.data-time]="daySlot.time"
+              [attr.data-day]="daySlot.day"
+              [attr.data-date]="daySlot.date"
+              (click)="onCellClick(daySlot)">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

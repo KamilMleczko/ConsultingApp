@@ -1,0 +1,84 @@
+.calendar-container {
+  height: 90vh;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.calendar-table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.time-slots {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.time-cell {
+  width: 40px;
+  position: relative;
+  padding: 0 10px;
+  border-right: 1px solid #dee2e6;
+  font-size: 0.9rem;
+  vertical-align: middle !important;
+}
+.time-label {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  background: white;
+  padding: 0 4px;
+}
+
+.date-info {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-number {
+  font-weight: bold;
+}
+
+.appointment-count {
+  color: #666;
+  margin-left: 5px;
+}
+
+.calendar-cell {
+  height: 30px;
+  border: 1px solid #dee2e6;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.calendar-cell:hover {
+  background-color: #f8f9fa;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1000;
+}
+
+.header-cell {
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+  margin: 0;
+  
+}
+tr {
+  margin: 0;
+  padding: 0;
+}
+
+td {
+  margin: 0;
+  padding: 0;
+}
+
