@@ -14,7 +14,7 @@ export class CalendarComponent implements OnInit{
   currentDate = new Date();
   currentMonth = '';
   currentYear = '';
-  
+  selectedDay: string | null = null; //for clicked day coloring (not event handling)
   daySelectedEvent = output<Date>();
 
   calendarDayClick(day: string) {
@@ -23,12 +23,12 @@ export class CalendarComponent implements OnInit{
       alert("nie wybrano daty");
       return;
     } 
-    
     const selectedDate = new Date(
       this.currentDate.getFullYear(),
       this.currentDate.getMonth(), //will work because currentDate is updated when changing calendar page
       parseInt(day)
     );
+    this.selectedDay = day; //for clicked day coloring (not event handling)
     this.daySelectedEvent.emit(selectedDate);
     console.log(`Clicked: Day ${day}`);
   }
@@ -68,6 +68,7 @@ export class CalendarComponent implements OnInit{
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() + 1
     );
+    this.selectedDay = null; //for clicked day coloring
     this.generateCalendar();
   }
 
@@ -76,6 +77,7 @@ export class CalendarComponent implements OnInit{
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() - 1
     );
+    this.selectedDay = null; //for clicked day coloring
     this.generateCalendar();
   }
 

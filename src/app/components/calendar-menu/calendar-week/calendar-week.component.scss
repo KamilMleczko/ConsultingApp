@@ -51,6 +51,14 @@
   border: 1px solid #dee2e6;
   padding: 2px;
   cursor: pointer;
+
+  &.current-day {
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+  
+  &.current-time {
+    border-top: 2px solid #505983;
+  }
 }
 
 .calendar-cell:hover {
@@ -70,7 +78,11 @@
   padding: 10px;
   font-weight: bold;
   margin: 0;
-  
+
+  &.current-day {
+    background-color: #3498db;
+    color: white;
+  }
 }
 tr {
   margin: 0;
@@ -82,3 +94,7 @@ td {
   padding: 0;
 }
 
+.today {
+  background-color: #e9f7fe;
+  border: 2px solid #007bff;
+}

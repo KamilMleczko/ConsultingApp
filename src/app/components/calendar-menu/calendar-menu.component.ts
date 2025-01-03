@@ -11,7 +11,6 @@ import { NavbarComponent } from '../navbar/navbar.component';
 export class CalendarMenuComponent {
   receivedDate = new Date(); 
   ReceiveSelectedDay(date: Date) {
-    console.log(date);
     this.receivedDate = date;
   }
 }

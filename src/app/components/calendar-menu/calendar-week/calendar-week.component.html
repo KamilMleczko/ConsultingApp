@@ -5,7 +5,7 @@
       <thead class="sticky-header">
         <tr>
           <th class="time-cell"></th>
-          <th *ngFor="let day of weekDays; let i = index" class="header-cell">
+          <th *ngFor="let day of weekDays; let i = index" class="header-cell"  [class.current-day]="isCurrentDay(i)" >
             {{ day }}
             <div class="date-info">
               <span class="date-number">{{ getDayDate(i) }}</span>
@@ -20,6 +20,8 @@
           </td>
           <td *ngFor="let daySlot of slot.daySlots" 
               class="calendar-cell"
+              [class.current-day]="isCurrentDay(daySlot.day)"
+              [class.current-time]="isCurrentTime(daySlot.time)"
               [attr.data-time]="daySlot.time"
               [attr.data-day]="daySlot.day"
               [attr.data-date]="daySlot.date"

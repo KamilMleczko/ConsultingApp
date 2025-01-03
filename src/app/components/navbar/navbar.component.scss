@@ -30,4 +30,26 @@
         }
       }
     }
-  }
+
+
+    .shopping-basket {
+      list-style: none;
+      position: absolute;
+      right: 50px;
+      
+      a {
+        color: #ecf0f1;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        &:hover {
+          background-color: #34495e;
+        }
+        
+        &.active {
+          background-color: #3498db;
+        }
+      }
+    }
+    
+}
+

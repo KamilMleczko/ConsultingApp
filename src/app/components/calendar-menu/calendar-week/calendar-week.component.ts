@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, OnChanges, OnInit , SimpleChanges} from '@angular/core';
-
 interface TimeSlot {
   time: string;
   displayTime: string; 
@@ -22,12 +21,13 @@ interface DaySlot {
   templateUrl: './calendar-week.component.html',
   styleUrl: './calendar-week.component.scss'
 })
-export class CalendarWeekComponent implements OnInit, OnChanges  {
+export class CalendarWeekComponent implements OnInit, OnChanges{
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timeSlots: TimeSlot[] = [];
   currentDate: Date = new Date();
 
   receivedDate = input<Date>();
+  
 
   ngOnInit(): void {
     this.generateTimeSlots();
@@ -87,6 +87,28 @@ export class CalendarWeekComponent implements OnInit, OnChanges  {
     return 0;
   }
 
+
+  isCurrentDay(dayIndex: number): boolean {
+    const today = new Date();
+    const cellDate = new Date(this.currentDate);
+    const monday = this.getMonday(cellDate);
+    monday.setDate(monday.getDate() + dayIndex);
+    
+    return today.getDate() === monday.getDate() && 
+           today.getMonth() === monday.getMonth() &&
+           today.getFullYear() === monday.getFullYear();
+  }
+  
+  isCurrentTime(time: string): boolean {
+    const now = new Date();
+    const [hours, minutes] = time.split(':').map(Number);
+    return now.getHours() === hours && 
+          now.getMinutes() - minutes < 30 &&
+          now.getMinutes() - minutes >= 0;
+  }
+
+
+  
   onCellClick(daySlot: DaySlot): void {
     console.log(`Clicked: Day ${daySlot.day}, Time ${daySlot.time}, Date ${daySlot.date}`);
     // Handle cell click event
