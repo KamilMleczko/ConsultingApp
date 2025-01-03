@@ -57,7 +57,9 @@
     height: 16px;
     font-size: smaller;
 }
-
+.calendar-days div:hover {
+    background-color: #e1e5e8;
+}
 .calendar-days .today {
     background-color: #e9f7fe;
     border: 2px solid #007bff;

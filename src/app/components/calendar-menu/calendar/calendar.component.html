@@ -16,6 +16,7 @@
       <div *ngFor="let day of calendarDays" 
            [class.today]="isToday(day)" 
            [class.empty]="!day"
+           (click)="calendarDayClick(day)"
            >
           
         {{day}}

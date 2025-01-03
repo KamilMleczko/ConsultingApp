@@ -9,13 +9,29 @@ import { EventEmitter } from 'stream';
   styleUrl: './calendar.component.scss'
 })
 export class CalendarComponent implements OnInit{
-  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   calendarDays: string[] = [];
   currentDate = new Date();
   currentMonth = '';
   currentYear = '';
   
- 
+  daySelectedEvent = output<Date>();
+
+  calendarDayClick(day: string) {
+    
+    if (!day){
+      alert("nie wybrano daty");
+      return;
+    } 
+    
+    const selectedDate = new Date(
+      this.currentDate.getFullYear(),
+      this.currentDate.getMonth(), //will work because currentDate is updated when changing calendar page
+      parseInt(day)
+    );
+    this.daySelectedEvent.emit(selectedDate);
+    console.log(`Clicked: Day ${day}`);
+  }
   ngOnInit() {
     this.generateCalendar();
   }
@@ -35,10 +51,13 @@ export class CalendarComponent implements OnInit{
     
     this.calendarDays = [];
     
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      this.calendarDays.push('');
+    const firstDayIndex = firstDay.getDay();
+    const mondayStart = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+ 
+    for (let i = 0; i < mondayStart; i++) {
+    this.calendarDays.push('');
     }
-    
+ 
     for (let i = 1; i <= lastDay.getDate(); i++) {
       this.calendarDays.push(i.toString());
     }

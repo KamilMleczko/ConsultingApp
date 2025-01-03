@@ -9,4 +9,9 @@ import { NavbarComponent } from '../navbar/navbar.component';
   styleUrl: './calendar-menu.component.scss'
 })
 export class CalendarMenuComponent {
+  receivedDate = new Date(); 
+  ReceiveSelectedDay(date: Date) {
+    console.log(date);
+    this.receivedDate = date;
+  }
 }

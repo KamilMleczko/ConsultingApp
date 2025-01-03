@@ -22,15 +22,22 @@ interface DaySlot {
   templateUrl: './calendar-week.component.html',
   styleUrl: './calendar-week.component.scss'
 })
-export class CalendarWeekComponent implements OnInit {
+export class CalendarWeekComponent implements OnInit, OnChanges  {
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timeSlots: TimeSlot[] = [];
   currentDate: Date = new Date();
 
+  receivedDate = input<Date>();
+
   ngOnInit(): void {
     this.generateTimeSlots();
   }
-
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['receivedDate'] && !changes['receivedDate'].firstChange) {
+      this.currentDate = new Date(changes['receivedDate'].currentValue);
+      this.generateTimeSlots();
+    }
+  }
   private generateTimeSlots(): void {
     // Get the monday of current week
     const monday = this.getMonday(this.currentDate);
