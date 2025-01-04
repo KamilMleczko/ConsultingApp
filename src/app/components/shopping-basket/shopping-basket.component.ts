@@ -8,5 +8,5 @@ import { NavbarComponent } from '../navbar/navbar.component';
   styleUrl: './shopping-basket.component.scss'
 })
 export class ShoppingBasketComponent {
-
+  
 }
