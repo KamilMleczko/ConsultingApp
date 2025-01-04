@@ -17,6 +17,7 @@ interface DaySlot {
 
 @Component({
   selector: 'app-calendar-week',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './calendar-week.component.html',
   styleUrl: './calendar-week.component.scss'

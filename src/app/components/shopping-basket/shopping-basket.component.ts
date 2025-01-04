@@ -3,6 +3,7 @@ import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
   selector: 'app-shopping-basket',
+  standalone: true,
   imports: [NavbarComponent],
   templateUrl: './shopping-basket.component.html',
   styleUrl: './shopping-basket.component.scss'

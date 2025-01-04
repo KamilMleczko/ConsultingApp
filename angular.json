@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ConsultingApp": {
+    "consulting-app": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -36,9 +36,9 @@
             ],
             "scripts": [],
             "server": "src/main.server.ts",
-            "outputMode": "server",
+            "prerender": true,
             "ssr": {
-              "entry": "src/server.ts"
+              "entry": "server.ts"
             }
           },
           "configurations": {
@@ -51,8 +51,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
                 }
               ],
               "outputHashing": "all"
@@ -69,10 +69,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ConsultingApp:build:production"
+              "buildTarget": "consulting-app:build:production"
             },
             "development": {
-              "buildTarget": "ConsultingApp:build:development"
+              "buildTarget": "consulting-app:build:development"
             }
           },
           "defaultConfiguration": "development"

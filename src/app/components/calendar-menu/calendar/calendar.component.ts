@@ -4,6 +4,7 @@ import { NgFor } from '@angular/common';
 import { EventEmitter } from 'stream';
 @Component({
   selector: 'app-calendar',
+  standalone: true,
   imports: [NgFor],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss'
