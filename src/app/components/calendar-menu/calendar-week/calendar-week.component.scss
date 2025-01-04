@@ -1,6 +1,10 @@
 .calendar-container {
+  position: absolute;
+  right: 1vw;
   height: 90vh;
   max-height: 90vh;
+  width: 80vw;
+
   overflow: hidden;
 }
 
@@ -12,19 +16,20 @@
 .time-slots {
   height: 100%;
   overflow-y: auto;
+  
 }
 
 .time-cell {
   width: 40px;
   position: relative;
   padding: 0 10px;
-  border-right: 1px solid #dee2e6;
+  //border-right: 1px solid #dee2e6;
   font-size: 0.9rem;
   vertical-align: middle !important;
 }
 .time-label {
   position: absolute;
-  top: -8px;
+  top: -9px;
   right: 10px;
   background: white;
   padding: 0 4px;
@@ -47,8 +52,9 @@
 }
 
 .calendar-cell {
-  height: 30px;
-  border: 1px solid #dee2e6;
+  height: 35px;
+  width: 30px;
+  border: 2px solid #dee2e6;
   padding: 2px;
   cursor: pointer;
 

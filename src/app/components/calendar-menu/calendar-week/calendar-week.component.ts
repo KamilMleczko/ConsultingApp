@@ -39,6 +39,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     }
   }
   private generateTimeSlots(): void {
+    this.timeSlots = [];
     // Get the monday of current week
     const monday = this.getMonday(this.currentDate);
 

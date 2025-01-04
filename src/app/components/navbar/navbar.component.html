@@ -1,22 +1,26 @@
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" ariaCurrentWhenActive="page">Home Page</a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/calendar-menu" routerLinkActive="active" ariaCurrentWhenActive="page">Book Appointment</a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/user-authentication" routerLinkActive="active" ariaCurrentWhenActive="page">User Authentication</a>
-          </li>
-
-
-          <li  class="shopping-basket">
-            <a routerLink="/shopping-basket" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-basket2-fill" style="font-size: 1em"></i></a>
-          </li>
-        </ul>
-      </div>
+  <nav class="navbar navbar-expand-lg navbar-dark ">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Find-a-Doc</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" ariaCurrentWhenActive="page">Home Page</a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/calendar-menu" routerLinkActive="active" ariaCurrentWhenActive="page">Book Appointment</a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/user-authentication" routerLinkActive="active" ariaCurrentWhenActive="page">User Authentication</a>
+              </li>
+    
+    
+              <li  class="shopping-basket">
+                <a routerLink="/shopping-basket" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-basket2-fill" style="font-size: 1em"></i></a>
+              </li>
+            </ul>
+        </div>
     </div>
-  </nav>
+</nav>
