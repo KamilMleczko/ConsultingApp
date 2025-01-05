@@ -5,10 +5,12 @@ import { UserAuthenticationComponent } from './components/user-authentication/us
 import { HomePageComponent } from './components/home-page/home-page.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { ShoppingBasketComponent } from './components/shopping-basket/shopping-basket.component';
+import { DatabaseHandlerComponent } from './components/database-handler/database-handler.component';
 export const routes: Routes = [
     { path: '', component: HomePageComponent },
     { path: 'calendar-menu', component: CalendarMenuComponent },
     { path: 'user-authentication', component: UserAuthenticationComponent },
-    {path: 'shopping-basket' , component: ShoppingBasketComponent},
+    { path: 'shopping-basket' , component: ShoppingBasketComponent},
+    { path: 'database-handler' , component: DatabaseHandlerComponent},
     { path: '**', component: PageNotFoundComponent } 
 ];

@@ -6,17 +6,24 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+
+              <li  class="nav-item">
+                <a routerLink="/database-handler" routerLinkActive="active" ariaCurrentWhenActive="page">Database</a>
+              </li>
+
               <li class="nav-item">
                 <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" ariaCurrentWhenActive="page">Home Page</a>
               </li>
+
               <li class="nav-item">
                 <a routerLink="/calendar-menu" routerLinkActive="active" ariaCurrentWhenActive="page">Book Appointment</a>
               </li>
+
               <li class="nav-item">
                 <a routerLink="/user-authentication" routerLinkActive="active" ariaCurrentWhenActive="page">User Authentication</a>
               </li>
     
-    
+  
               <li  class="shopping-basket">
                 <a routerLink="/shopping-basket" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-basket2-fill" style="font-size: 1em"></i></a>
               </li>
