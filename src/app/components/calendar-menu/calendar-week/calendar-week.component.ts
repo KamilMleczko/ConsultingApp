@@ -113,6 +113,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   
   onCellClick(daySlot: DaySlot): void {
     console.log(`Clicked: Day ${daySlot.day}, Time ${daySlot.time}, Date ${daySlot.date}`);
-    // Handle cell click event
+    // Handle cell click event later
   }
 }

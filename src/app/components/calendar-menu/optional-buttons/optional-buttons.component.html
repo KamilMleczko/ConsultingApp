@@ -1,0 +1,32 @@
+<button (click)="toggleForm()" class="btn btn-primary mb-3">
+    Add Doctor Schedule
+  </button>
+
+  <form *ngIf="showForm" [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="schedule-form">
+    <div class="form-group mb-3">
+      <label for="startDate">Start Date</label>
+      <input type="date" id="startDate" formControlName="startDate" class="form-control">
+    </div>
+
+    <div class="form-group mb-3">
+      <label for="endDate">End Date</label>
+      <input type="date" id="endDate" formControlName="endDate" class="form-control">
+    </div>
+
+    <div formGroupName="weeklyAvailability">
+      <h4>Weekly Schedule</h4>
+      <ng-container *ngFor="let day of weekDays">
+        <div [formGroupName]="day.toLowerCase()" class="day-group mb-3">
+          <label>{{ day }}</label>
+          <div class="time-inputs">
+            <input type="time" [formControlName]="'start'" class="form-control">
+            <input type="time" [formControlName]="'end'" class="form-control">
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <button type="submit" [disabled]="!scheduleForm.valid" class="btn btn-success">
+      Submit Schedule
+    </button>
+  </form>

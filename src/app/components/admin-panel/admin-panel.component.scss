@@ -1,0 +1,44 @@
+.admin-panel {
+    padding: 1rem;
+  }
+  
+  .section {
+    margin-bottom: 2rem;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 1rem;
+  }
+  
+  .loading {
+    margin-bottom: 1rem;
+    color: #5e3ccc;
+    font:bold;
+    
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  button:hover {
+    background-color: #5e3ccc;
+    color: #fff;
+    transition: all 0.3s ease;
+  }

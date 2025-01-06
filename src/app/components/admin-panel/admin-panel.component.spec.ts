@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DatabaseHandlerComponent } from './database-handler.component';
+import { AdminPanelComponent } from './admin-panel.component';
 
 describe('DatabaseHandlerComponent', () => {
-  let component: DatabaseHandlerComponent;
-  let fixture: ComponentFixture<DatabaseHandlerComponent>;
+  let component: AdminPanelComponent;
+  let fixture: ComponentFixture<AdminPanelComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DatabaseHandlerComponent]
+      imports: [AdminPanelComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DatabaseHandlerComponent);
+    fixture = TestBed.createComponent(AdminPanelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

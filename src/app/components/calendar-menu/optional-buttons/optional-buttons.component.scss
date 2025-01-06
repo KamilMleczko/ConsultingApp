@@ -1,0 +1,15 @@
+.schedule-form {
+    max-width: 500px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  .day-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .time-inputs {
+    display: flex;
+    gap: 10px;
+  }

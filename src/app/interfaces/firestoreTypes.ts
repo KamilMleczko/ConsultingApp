@@ -1,5 +1,6 @@
 import { Timestamp } from '@angular/fire/firestore';
 
+
 export interface User {
     email: string;
     displayName: string;
@@ -7,25 +8,40 @@ export interface User {
     specialization?: string;
     phoneNumber?: string;
     createdAt: Timestamp;
+    age: number;
+    sex: Sex;
   }
 
-export interface DoctorSchedule {
+  export interface TimeRange {
+    start: string; // HH:mm format
+    end: string;   // HH:mm format
+  }
+  
+  export interface WeeklySchedule {
+    monday?: TimeRange;
+    tuesday?: TimeRange;
+    wednesday?: TimeRange;
+    thursday?: TimeRange;
+    friday?: TimeRange;
+    saturday?: TimeRange;
+    sunday?: TimeRange;
+  }
+  
+  export interface SchedulePeriod {
+    startDate: Timestamp;
+    endDate: Timestamp;
+    weeklyAvailability: WeeklySchedule;
+  }
+  
+  export interface DoctorSchedule {
     doctorId: string;
-    weeklyAvailability: {
-    monday: { start: string; end: string; };
-    tuesday: { start: string; end: string; };
-    wednesday: { start: string; end: string; };
-    thursday: { start: string; end: string; };
-    friday: { start: string; end: string; };
-    saturday: { start: string; end: string; };
-    sunday: { start: string; end: string; };
-    };
-    exceptions: {
-        date: Timestamp;
-        available: boolean;
-        customHours?: { start: string; end: string; };
-      }[];
-}
+    schedulePeriods: SchedulePeriod[];
+    exceptions: Array<{
+      date: Timestamp;
+      available: boolean;
+      customHours?: TimeRange;
+    }>;
+  }
 export interface Appointment {
     doctorId: string;
     patientId: string;
@@ -35,3 +51,6 @@ export interface Appointment {
     type: string;
     notes?: string;
 }
+
+export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
+export type Sex = 'male' | 'female' | 'other';

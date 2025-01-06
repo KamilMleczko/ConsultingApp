@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DataBaseInitService } from './data-base-init.service';
+import { DataBaseService } from './data-base.service';
 
 describe('DataBaseInitService', () => {
-  let service: DataBaseInitService;
+  let service: DataBaseService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DataBaseInitService);
+    service = TestBed.inject(DataBaseService);
   });
 
   it('should be created', () => {
