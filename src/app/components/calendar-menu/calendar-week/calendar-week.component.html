@@ -1,11 +1,10 @@
 <div class="calendar-container">
-  
   <div class="time-slots">
     <table class="calendar-table">
       <thead class="sticky-header">
         <tr>
           <th class="time-cell"></th>
-          <th *ngFor="let day of weekDays; let i = index" class="header-cell"  [class.current-day]="isCurrentDay(i)" >
+          <th *ngFor="let day of weekDays; let i = index" class="header-cell" [class.current-day]="isCurrentDay(i)">
             {{ day }}
             <div class="date-info">
               <span class="date-number">{{ getDayDate(i) }}</span>
@@ -15,11 +14,12 @@
       </thead>
       <tbody>
         <tr *ngFor="let slot of timeSlots">
-          <td class="time-cell"> 
+          <td class="time-cell">
             <span class="time-label" *ngIf="slot.displayTime">{{ slot.time }}</span>
           </td>
-          <td *ngFor="let daySlot of slot.daySlots" 
+          <td *ngFor="let daySlot of slot.daySlots"
               class="calendar-cell"
+              [class.available]="daySlot.available"
               [class.current-day]="isCurrentDay(daySlot.day)"
               [class.current-time]="isCurrentTime(daySlot.time)"
               [attr.data-time]="daySlot.time"

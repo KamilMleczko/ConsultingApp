@@ -1,5 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, OnChanges, OnInit , SimpleChanges} from '@angular/core';
+import { Component, input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
+import { WeeklySchedule, DoctorSchedule, SchedulePeriod } from '../../../interfaces/firestoreTypes';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { DataBaseFacadeService } from '../../../services/data-base-facade-service/data-base-facade.service';
+
 interface TimeSlot {
   time: string;
   displayTime: string; 
@@ -11,6 +15,7 @@ interface DaySlot {
   time: string;
   date: number;
   appointmentCount: number;
+  available: boolean;
   events?: any[];
 }
 
@@ -28,20 +33,76 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   currentDate: Date = new Date();
 
   receivedDate = input<Date>();
-  
 
-  ngOnInit(): void {
+  private firestore: Firestore = inject(Firestore);
+  doctorId: string = 'sample-doctor-id'; // TODO: Replace in authorisation phase with userID
+  currentSchedule: WeeklySchedule | null = null;
+
+  async ngOnInit():  Promise<void>{
+    await this.updateScheduleForCurrentWeek();
     this.generateTimeSlots();
   }
-  ngOnChanges(changes: SimpleChanges): void {
+  async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['receivedDate'] && !changes['receivedDate'].firstChange) {
       this.currentDate = new Date(changes['receivedDate'].currentValue);
+      await this.updateScheduleForCurrentWeek();
       this.generateTimeSlots();
     }
   }
+
+  private async updateScheduleForCurrentWeek(): Promise<void> {
+    const monday = this.getMonday(this.currentDate);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    try {
+      const schedulesRef = collection(this.firestore, 'doctorSchedules');
+      const q = query(schedulesRef, where('doctorId', '==', this.doctorId));
+      const querySnapshot = await getDocs(q);
+
+      this.currentSchedule = null;
+
+      querySnapshot.forEach((doc) => {
+        const schedule = doc.data() as DoctorSchedule;
+        const applicablePeriod = this.findApplicablePeriod(schedule.schedulePeriods, monday, sunday);
+        
+        if (applicablePeriod) {
+          this.currentSchedule = applicablePeriod.weeklyAvailability;
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching doctor schedule:', error);
+    }
+  }
+
+  private findApplicablePeriod(
+    periods: SchedulePeriod[], 
+    weekStart: Date, 
+    weekEnd: Date
+  ): SchedulePeriod | null {
+    return periods.find(period => {
+      const periodStart = period.startDate.toDate();
+      const periodEnd = period.endDate.toDate();
+      
+      return periodStart <= weekEnd && periodEnd >= weekStart;
+    }) || null;
+  }
+
+  private isTimeInRange(time: string, daySchedule?: { start: string; end: string }): boolean {
+    if (!daySchedule) return false;
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    const [startHours, startMinutes] = daySchedule.start.split(':').map(Number);
+    const [endHours, endMinutes] = daySchedule.end.split(':').map(Number);
+    
+    const timeMinutes = hours * 60 + minutes;
+    const startMinutes2 = startHours * 60 + startMinutes;
+    const endMinutes2 = endHours * 60 + endMinutes;
+    
+    return timeMinutes >= startMinutes2 && timeMinutes < endMinutes2;
+  }
   private generateTimeSlots(): void {
     this.timeSlots = [];
-    // Get the monday of current week
     const monday = this.getMonday(this.currentDate);
 
     for (let hour = 0; hour < 24; hour++) {
@@ -53,11 +114,15 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
           const currentDate = new Date(monday);
           currentDate.setDate(monday.getDate() + day);
           
+          const dayName = this.weekDays[day].toLowerCase() as keyof WeeklySchedule;
+          const daySchedule = this.currentSchedule?.[dayName];
+          
           daySlots.push({
             day,
             time: timeString,
             date: currentDate.getDate(),
             appointmentCount: 0,
+            available: this.isTimeInRange(timeString, daySchedule),
             events: []
           });
         }

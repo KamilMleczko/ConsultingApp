@@ -76,7 +76,7 @@
   position: sticky;
   top: 0;
   background-color: white;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .header-cell {
@@ -105,3 +105,18 @@ td {
   background-color: #e9f7fe;
   border: 2px solid #007bff;
 }
+
+.calendar-cell.available {
+  background-color: #8ed68e;
+  transition: transform 0.2s ease-in-out;
+
+}
+.calendar-cell.calendar-cell.available:hover {
+  
+  background-color: #45c845;
+  transform: scale(1.05) ;
+
+}
+// .calendar-cell:not(.available) { //maybe will use later
+//   background-color: #b92f2f;
+// }

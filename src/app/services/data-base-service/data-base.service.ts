@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { Firestore, Timestamp, collection, 
         addDoc, doc, setDoc, 
@@ -307,4 +308,26 @@ export class DataBaseService {
       });
 
   }
+
+  async getDoctorSchedules(doctorId: string): Promise<DoctorSchedule[]> {
+    try {
+      const schedulesRef = collection(this.firestore, 'doctorSchedules');
+      const q = query(schedulesRef, where('doctorId', '==', doctorId));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data() as DoctorSchedule;
+        return {
+          id: doc.id,
+          doctorId: data.doctorId,
+          schedulePeriods: data.schedulePeriods,
+          exceptions: data.exceptions
+        };
+      }) as DoctorSchedule[];
+    } catch (error) {
+      console.error('Error fetching doctor schedules:', error);
+      throw new Error('Failed to fetch doctor schedules');
+    }
+  }
+  
 }

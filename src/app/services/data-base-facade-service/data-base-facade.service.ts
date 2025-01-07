@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataBaseService } from '../data-base-service/data-base.service';
-import { User, Appointment, WeeklySchedule } from '../../interfaces/firestoreTypes';
+import { User, Appointment, WeeklySchedule , DoctorSchedule} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -126,7 +126,7 @@ export class DataBaseFacadeService {
     }
   }
 
-  // Appointment Operations
+
   async addAppointment(appointmentData: Omit<Appointment, 'dateTime'> & { dateTime: Date }): Promise<string> {
     this._loading.next(true);
     this._error.next(null);
@@ -185,4 +185,21 @@ export class DataBaseFacadeService {
     }
   }
 
+
+  async getDoctorSchedules(doctorId: string): Promise<DoctorSchedule[]> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getDoctorSchedules(doctorId);
+    } catch (error) {
+      this._error.next('Failed to fetch doctor schedules');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+
+  
+  
 }
