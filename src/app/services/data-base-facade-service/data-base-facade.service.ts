@@ -13,7 +13,6 @@ export class DataBaseFacadeService {
   
   loading$ = this._loading.asObservable();
   error$ = this._error.asObservable();
-  //constructor() { }
   private dbService: DataBaseService = inject(DataBaseService);
 
 
@@ -105,71 +104,10 @@ export class DataBaseFacadeService {
     }
   }
 
-  async addExceptionToDoctorSchedule(
-    scheduleId: string,
-    exception: {
-      date: Date;
-      available: boolean;
-      customHours?: { start: string; end: string; }
-    }
-  ): Promise<void> {
-    this._loading.next(true);
-    this._error.next(null);
-    
-    try {
-      await this.dbService.addExceptionToDoctorSchedule(scheduleId, exception);
-    } catch (error) {
-      this._error.next('Failed to add exception to doctor schedule');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
+  
 
 
-  async addAppointment(appointmentData: Omit<Appointment, 'dateTime'> & { dateTime: Date }): Promise<string> {
-    this._loading.next(true);
-    this._error.next(null);
-    
-    try {
-      const appointmentId = await this.dbService.addAppointment(appointmentData);
-      return appointmentId;
-    } catch (error) {
-      this._error.next('Failed to add appointment');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
 
-  async removeAppointment(appointmentId: string): Promise<void> {
-    this._loading.next(true);
-    this._error.next(null);
-    
-    try {
-      await this.dbService.removeAppointment(appointmentId);
-    } catch (error) {
-      this._error.next('Failed to remove appointment');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
-
-  // Existing sample data operations
-  async initializeSampleData(): Promise<void> {
-    this._loading.next(true);
-    this._error.next(null);
-    
-    try {
-      await this.dbService.createSampleData();
-    } catch (error) {
-      this._error.next('Failed to initialize sample data');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
   
   async clearAllData(): Promise<void> {
     this._loading.next(true);

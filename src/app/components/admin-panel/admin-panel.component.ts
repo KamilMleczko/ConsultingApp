@@ -26,15 +26,6 @@ export class AdminPanelComponent {
    sampleScheduleId = 'sample-schedule-id';
    sampleAppointmentId = 'sample-appointment-id';
   
-   async initializeSampleData(): Promise<void> {
-    try {
-      await this.dbFacade.initializeSampleData();
-      this.showSuccess('Sample data created successfully');
-    } catch (error) {
-      this.showError('Error creating sample data');
-    }
-  }
-  
   async clearDatabase(): Promise<void> {
     try {
       await this.dbFacade.clearAllData();
@@ -129,20 +120,7 @@ export class AdminPanelComponent {
     }
   }
 
-  async addScheduleException(): Promise<void> {
-    try {
-      const exception = {
-        date: new Date('2025-02-01'),
-        available: false,
-        customHours: { start: '10:00', end: '15:00' }
-      };
-      
-      await this.dbFacade.addExceptionToDoctorSchedule(this.sampleScheduleId, exception);
-      this.showSuccess('Schedule exception added successfully');
-    } catch (error) {
-      this.showError('Error adding schedule exception');
-    }
-  }
+  
 
   async removeSchedule(scheduleId: string): Promise<void> {
     try {
@@ -153,33 +131,7 @@ export class AdminPanelComponent {
     }
   }
 
-  // Appointment operations
-  async addAppointment(): Promise<void> {
-    try {
-      const appointmentData = {
-        doctorId: this.sampleUserId,
-        patientId: 'sample-patient-id',
-        dateTime: new Date('2025-01-15T10:00:00'),
-        duration: 30,
-        status: 'scheduled' as AppointmentStatus,
-        type: 'follow-up' 
-      };
-      
-      const appointmentId = await this.dbFacade.addAppointment(appointmentData);
-      this.showSuccess(`Appointment added successfully with ID: ${appointmentId}`);
-    } catch (error) {
-      this.showError('Error adding appointment');
-    }
-  }
 
-  async removeAppointment(appointmentId: string): Promise<void> {
-    try {
-      await this.dbFacade.removeAppointment(appointmentId);
-      this.showSuccess('Appointment removed successfully');
-    } catch (error) {
-      this.showError('Error removing appointment');
-    }
-  }
   
   private showSuccess(message: string): void {
     // Replace with your preferred notification method

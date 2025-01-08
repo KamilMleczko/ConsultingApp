@@ -37,21 +37,13 @@ export interface User {
     id: string;
     doctorId: string;
     schedulePeriods: SchedulePeriod[];
-    exceptions: Array<{
-      date: Timestamp;
-      available: boolean;
-      customHours?: TimeRange;
-    }>;
+    exceptions: TimeRange[];
   }
 
   export interface DoctorScheduleWithoutId {
     doctorId: string;
     schedulePeriods: SchedulePeriod[];
-    exceptions: Array<{
-      date: Timestamp;
-      available: boolean;
-      customHours?: TimeRange;
-    }>;
+    exceptions: TimeRange[];
   }
 export interface Appointment {
     doctorId: string;
