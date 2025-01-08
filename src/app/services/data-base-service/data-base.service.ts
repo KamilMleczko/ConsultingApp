@@ -5,8 +5,8 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, Timestamp, collection, 
         addDoc, doc, setDoc, 
         deleteDoc, query, where, 
-        getDocs,updateDoc, arrayUnion } from '@angular/fire/firestore';
-import { DoctorSchedule, User, Appointment, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId } from '../../interfaces/firestoreTypes';
+        getDocs,updateDoc, arrayUnion , arrayRemove} from '@angular/fire/firestore';
+import { DoctorSchedule, User, Appointment, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId, Exception} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -240,6 +240,21 @@ export class DataBaseService {
     } catch (error) {
       console.error('Error adding exception:', error);
       throw new Error('Failed to add exception');
+    }
+  }
+
+  async removeExceptionFromSchedule(scheduleId: string, exception: Exception): Promise<void> {
+    try {
+      const scheduleRef = doc(this.firestore, 'doctorSchedules', scheduleId);
+      await updateDoc(scheduleRef, {
+        exceptions: arrayRemove({
+          startDate: exception.startDate,
+          endDate: exception.endDate
+        })
+      });
+    } catch (error) {
+      console.error('Error removing exception:', error);
+      throw new Error('Failed to remove exception');
     }
   }
 }

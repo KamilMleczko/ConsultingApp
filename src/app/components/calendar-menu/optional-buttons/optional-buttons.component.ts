@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { FormBuilder, Validators,  FormGroup, ReactiveFormsModule, } from '@angular/forms';
 import { DataBaseFacadeService } from '../../../services/data-base-facade-service/data-base-facade.service';
 import { Injectable, inject } from '@angular/core';
-import { WeeklySchedule , DoctorSchedule} from '../../../interfaces/firestoreTypes';
+import { WeeklySchedule , DoctorSchedule, } from '../../../interfaces/firestoreTypes';
 import { CommonModule } from '@angular/common'; 
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { Timestamp } from '@angular/fire/firestore';
 @Component({
   selector: 'app-optional-buttons',
   standalone: true,
@@ -336,4 +337,36 @@ export class OptionalButtonsComponent {
     }
     return null;
   }
+
+
+  async deleteException(scheduleId: string, exception: { startDate: Date, endDate: Date }) {
+    if (confirm('Are you sure you want to delete this exception?')) {
+      try {
+        await this.dbFacade.removeExceptionFromSchedule(scheduleId, {
+          startDate: Timestamp.fromDate(exception.startDate),
+          endDate: Timestamp.fromDate(exception.endDate)
+        });
+        
+        // Refresh the schedules and exceptions lists
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        
+        // Update allExceptions array
+        this.allExceptions = this.schedules
+          .filter(schedule => schedule.exceptions.length > 0)
+          .map(schedule => ({
+            scheduleId: schedule.id,
+            exceptions: schedule.exceptions.map(exception => ({
+              startDate: exception.startDate.toDate(),
+              endDate: exception.endDate.toDate()
+            }))
+          }));
+          
+        alert('Exception deleted successfully');
+      } catch (error) {
+        console.error('Error deleting exception:', error);
+        alert('Error deleting exception');
+      }
+    }
+  }
+
 }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataBaseService } from '../data-base-service/data-base.service';
-import { User, Appointment, WeeklySchedule , DoctorSchedule} from '../../interfaces/firestoreTypes';
+import { User, Appointment, WeeklySchedule , DoctorSchedule, Exception} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -180,6 +180,20 @@ export class DataBaseFacadeService {
       await this.dbService.addExceptionToSchedule(scheduleId, exception);
     } catch (error) {
       this._error.next('Failed to add exception');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+
+  async removeExceptionFromSchedule(scheduleId: string, exception: Exception): Promise<void> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      await this.dbService.removeExceptionFromSchedule(scheduleId, exception);
+    } catch (error) {
+      this._error.next('Failed to remove exception');
       throw error;
     } finally {
       this._loading.next(false);

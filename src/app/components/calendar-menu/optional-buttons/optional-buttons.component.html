@@ -189,6 +189,9 @@
                   <strong>Exception Period:</strong><br>
                   {{ exception.startDate | date:'mediumDate' }} - {{ exception.endDate | date:'mediumDate' }}
                 </div>
+                <button class="btn btn-danger btn-sm" (click)="deleteException(scheduleExceptions.scheduleId, exception)">
+                  Delete Exception
+                </button>
               </div>
             </div>
           </div>
