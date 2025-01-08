@@ -37,13 +37,18 @@ export interface User {
     id: string;
     doctorId: string;
     schedulePeriods: SchedulePeriod[];
-    exceptions: TimeRange[];
+    exceptions: Exception[];
   }
 
   export interface DoctorScheduleWithoutId {
     doctorId: string;
     schedulePeriods: SchedulePeriod[];
-    exceptions: TimeRange[];
+    exceptions: Exception[];
+    }
+
+  export interface Exception{
+    startDate: Timestamp;
+    endDate: Timestamp;
   }
 export interface Appointment {
     doctorId: string;
