@@ -1,10 +1,11 @@
 
+
 import { Injectable, inject } from '@angular/core';
 import { Firestore, Timestamp, collection, 
         addDoc, doc, setDoc, 
         deleteDoc, query, where, 
         getDocs,updateDoc, arrayUnion } from '@angular/fire/firestore';
-import { DoctorSchedule, User, Appointment, TimeRange, WeeklySchedule, SchedulePeriod } from '../../interfaces/firestoreTypes';
+import { DoctorSchedule, User, Appointment, TimeRange, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId } from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -92,7 +93,7 @@ export class DataBaseService {
         weeklyAvailability: scheduleData.weeklyAvailability
       };
 
-      const newSchedule: DoctorSchedule = {
+      const newSchedule: DoctorScheduleWithoutId = {
         doctorId,
         schedulePeriods: [schedulePeriod],
         exceptions: []
@@ -230,10 +231,10 @@ export class DataBaseService {
     const patientId = patientRef.id;
 
     // Create doctor's schedule with multiple periods
-    const scheduleData: DoctorSchedule = {
+    const scheduleData: DoctorScheduleWithoutId = {
       doctorId: doctorId,
-      schedulePeriods: [
-        {
+      schedulePeriods:
+        [{
           startDate: Timestamp.fromDate(new Date('2025-03-05')),
           endDate: Timestamp.fromDate(new Date('2025-04-07')),
           weeklyAvailability: {
@@ -241,16 +242,8 @@ export class DataBaseService {
             wednesday: { start: '09:00', end: '17:00' },
             friday: { start: '10:00', end: '15:00' }
           }
-        },
-        {
-          startDate: Timestamp.fromDate(new Date('2025-04-08')),
-          endDate: Timestamp.fromDate(new Date('2025-05-10')),
-          weeklyAvailability: {
-            monday: { start: '12:00', end: '16:00' },
-            thursday: { start: '09:00', end: '17:00' },
-            friday: { start: '14:00', end: '18:00' }
-          }
         }
+        
       ],
       exceptions: []
     };
@@ -315,19 +308,50 @@ export class DataBaseService {
       const q = query(schedulesRef, where('doctorId', '==', doctorId));
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => {
-        const data = doc.data() as DoctorSchedule;
-        return {
-          id: doc.id,
-          doctorId: data.doctorId,
-          schedulePeriods: data.schedulePeriods,
-          exceptions: data.exceptions
-        };
-      }) as DoctorSchedule[];
+      return querySnapshot.docs.map(doc => ({
+        ...doc.data() as DoctorSchedule,
+        id: doc.id
+      }));
     } catch (error) {
       console.error('Error fetching doctor schedules:', error);
       throw new Error('Failed to fetch doctor schedules');
     }
   }
+  async addSingleDaySchedule(
+    doctorId: string,
+    date: Date,
+    daySchedule: { start: string; end: string; }
+  ): Promise<string> {
+    try {
+      const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
+      const weeklyAvailability: WeeklySchedule = {
+        [dayOfWeek]: { start: daySchedule.start, end: daySchedule.end }
+      };
   
+      const schedule: DoctorScheduleWithoutId = {
+        
+        doctorId,
+        schedulePeriods: [{
+          startDate: Timestamp.fromDate(date),
+          endDate: Timestamp.fromDate(date),
+          weeklyAvailability
+        }],
+        exceptions: []
+      };
+  
+      const docRef = await addDoc(collection(this.firestore, 'doctorSchedules'), schedule);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding single day schedule:', error);
+      throw new Error('Failed to add single day schedule');
+    }
+  }
+  async removeDoctorScheduleById(scheduleId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(this.firestore, 'doctorSchedules', scheduleId));
+    } catch (error) {
+      console.error('Error removing schedule:', error);
+      throw new Error('Failed to remove schedule');
+    }
+  }
 }
