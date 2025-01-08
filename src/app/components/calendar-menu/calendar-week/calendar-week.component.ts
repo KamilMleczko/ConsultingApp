@@ -35,6 +35,9 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   receivedDate = input<Date>();
 
   private firestore: Firestore = inject(Firestore);
+  schedules: DoctorSchedule[] = [];
+  private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
+
   doctorId: string = 'sample-doctor-id'; // TODO: Replace in authorisation phase with userID
   currentSchedule: WeeklySchedule | null = null;
 
@@ -59,13 +62,12 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       const schedulesRef = collection(this.firestore, 'doctorSchedules');
       const q = query(schedulesRef, where('doctorId', '==', this.doctorId));
       const querySnapshot = await getDocs(q);
-
+      this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
       this.currentSchedule = null;
 
       querySnapshot.forEach((doc) => {
         const schedule = doc.data() as DoctorSchedule;
         const applicablePeriod = this.findApplicablePeriod(schedule.schedulePeriods, monday, sunday);
-        
         if (applicablePeriod) {
           this.currentSchedule = applicablePeriod.weeklyAvailability;
         }
@@ -116,13 +118,15 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
           
           const dayName = this.weekDays[day].toLowerCase() as keyof WeeklySchedule;
           const daySchedule = this.currentSchedule?.[dayName];
+          const isException = this.isDateInException(currentDate);
+          const isAvailable = !isException && this.isDateTimeInSchedule(currentDate, timeString);
           
           daySlots.push({
             day,
             time: timeString,
             date: currentDate.getDate(),
             appointmentCount: 0,
-            available: this.isTimeInRange(timeString, daySchedule),
+            available: isAvailable ,//this.isTimeInRange(timeString, daySchedule) && !isException,
             events: []
           });
         }
@@ -147,6 +151,13 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     const monday = this.getMonday(date);
     monday.setDate(monday.getDate() + dayIndex);
     return monday.getDate();
+  }
+
+  getDayDateForException(dayIndex: number): Date {
+    const date = new Date(this.currentDate);
+    const monday = this.getMonday(date);
+    monday.setDate(monday.getDate() + dayIndex);
+    return monday;
   }
 
   getAppointmentCount(dayIndex: number): number {
@@ -179,5 +190,64 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   onCellClick(daySlot: DaySlot): void {
     console.log(`Clicked: Day ${daySlot.day}, Time ${daySlot.time}, Date ${daySlot.date}`);
     // Handle cell click event later
+  }
+
+  isDateInException(date: Date): boolean {
+    // Convert the input date to the start of the day for comparison
+    const targetDate = new Date(date);
+    targetDate.setHours(1, 0, 0, 0);
+    //const targetDate =date
+    // Check each schedule's exceptions
+    for (const schedule of this.schedules) {
+      // First check if the date falls within this schedule's period
+      const isInSchedulePeriod = schedule.schedulePeriods.some(period => {
+        const periodStart = period.startDate.toDate();
+        const periodEnd = period.endDate.toDate();
+        return targetDate >= periodStart && targetDate <= periodEnd;
+      });
+
+      if (isInSchedulePeriod) {
+        // Then check if the date falls within any exception period
+        const isInException = schedule.exceptions.some(exception => {
+          const exceptionStart = exception.startDate.toDate();
+          const exceptionEnd = exception.endDate.toDate();
+          return targetDate >= exceptionStart && targetDate <= exceptionEnd;
+        });
+
+        if (isInException) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+  
+  private isDateTimeInSchedule(date: Date, time: string): boolean {
+    if (!this.schedules.length) return false;
+
+    const dateTime = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    dateTime.setHours(hours, minutes, 0, 0);
+
+    for (const schedule of this.schedules) {
+      for (const period of schedule.schedulePeriods) {
+        const periodStart = period.startDate.toDate();
+        const periodEnd = period.endDate.toDate();
+
+        // Check if the date falls within the schedule period
+        if (dateTime >= periodStart && dateTime <= periodEnd) {
+          const dayName = this.weekDays[dateTime.getDay() === 0 ? 6 : dateTime.getDay() - 1]
+            .toLowerCase() as keyof WeeklySchedule;
+          const daySchedule = period.weeklyAvailability[dayName];
+
+          // Check if the time falls within the day's schedule
+          if (daySchedule) {
+            return this.isTimeInRange(time, daySchedule);
+          }
+        }
+      }
+    }
+    return false;
   }
 }

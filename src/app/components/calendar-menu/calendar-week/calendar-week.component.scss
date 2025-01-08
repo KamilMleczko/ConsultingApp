@@ -112,6 +112,13 @@ td {
 
 }
 
+.calendar-cell.exception {
+  background-color: #d30000;
+  transition: transform 0.2s ease-in-out;
+
+}
+
+
 
 .calendar-cell.calendar-cell.available:hover {
   

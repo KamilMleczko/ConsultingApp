@@ -224,4 +224,22 @@ export class DataBaseService {
       throw new Error('Failed to remove schedule');
     }
   }
+
+
+  async addExceptionToSchedule(scheduleId: string, exception: { startDate: Date; endDate: Date }): Promise<void> {
+    try {
+      const scheduleRef = doc(this.firestore, 'doctorSchedules', scheduleId);
+      const exceptionData = {
+        startDate: Timestamp.fromDate(exception.startDate),
+        endDate: Timestamp.fromDate(exception.endDate)
+      };
+      
+      await updateDoc(scheduleRef, {
+        exceptions: arrayUnion(exceptionData)
+      });
+    } catch (error) {
+      console.error('Error adding exception:', error);
+      throw new Error('Failed to add exception');
+    }
+  }
 }

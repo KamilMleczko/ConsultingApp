@@ -19,7 +19,8 @@
           </td>
           <td *ngFor="let daySlot of slot.daySlots"
               class="calendar-cell"
-              [class.available]="daySlot.available"
+              [class.available]="daySlot.available && !isDateInException(getDayDateForException(daySlot.day))"
+              [class.exception]="isDateInException(getDayDateForException(daySlot.day))"
               [class.current-day]="isCurrentDay(daySlot.day)"
               [class.current-time]="isCurrentTime(daySlot.time)"
               [attr.data-time]="daySlot.time"

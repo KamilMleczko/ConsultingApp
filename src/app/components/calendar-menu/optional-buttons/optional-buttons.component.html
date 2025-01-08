@@ -76,6 +76,13 @@
           <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule.id)">
             Delete Schedule
           </button>
+          <button class="btn btn-warning btn-sm  m-1" (click)="toggleExceptionForm(schedule.id)">
+            Add Exception
+          </button>
+          <button (click)="toggleExceptionsList()" class="btn btn-primary btn-sm">
+            Show Exceptions
+          </button>
+          
           <div *ngFor="let period of schedule.schedulePeriods" class="card">
             <div class="card-body">
               <h5 class="card-title">Schedule Period</h5>
@@ -117,5 +124,75 @@
           Cancel
         </button>
       </form>
+    </div>
+  </div>
+
+  <div *ngIf="showExceptionForm" class="schedule-form-overlay">
+    <div class="schedule-form-container">
+      <form [formGroup]="exceptionForm" (ngSubmit)="submitException()" class="schedule-form">
+        <h4>Add Exception Period</h4>
+        
+        <div class="form-group mb-3">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" formControlName="startDate" class="form-control">
+        </div>
+  
+        <div class="form-group mb-3">
+          <label for="endDate">End Date</label>
+          <input type="date" id="endDate" formControlName="endDate" class="form-control">
+        </div>
+  
+        <button type="submit" [disabled]="!exceptionForm.valid" class="btn btn-success m-2">
+          Add Exception
+        </button>
+        
+        <button type="button" (click)="toggleExceptionForm(currentScheduleId!)" class="btn btn-secondary m-2">
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <div *ngIf="showExceptionsList" class="schedule-list-overlay">
+    <div class="schedules-content">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Doctor Exceptions</h3>
+        <button (click)="hideExceptions()" class="btn btn-sm btn-secondary">
+          Hide
+        </button>
+      </div>
+      
+      <div *ngIf="loading$ | async" class="text-center">
+        Loading exceptions...
+      </div>
+      
+      <div *ngIf="error$ | async as error" class="alert alert-danger">
+        {{ error }}
+      </div>
+  
+      <div *ngIf="allExceptions.length === 0" class="alert alert-info">
+        No exceptions found.
+      </div>
+      
+      <div *ngFor="let scheduleExceptions of allExceptions" class="mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Schedule Exceptions</h5>
+            <div *ngIf="getSchedulePeriodDates(scheduleExceptions.scheduleId) as periodDates" class="text-muted mb-2">
+              Schedule Period: {{ periodDates.start | date:'mediumDate' }} - {{ periodDates.end | date:'mediumDate' }}
+            </div>
+            
+            <div *ngFor="let exception of scheduleExceptions.exceptions" class="mb-2 p-2 border rounded">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>Exception Period:</strong><br>
+                  {{ exception.startDate | date:'mediumDate' }} - {{ exception.endDate | date:'mediumDate' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>

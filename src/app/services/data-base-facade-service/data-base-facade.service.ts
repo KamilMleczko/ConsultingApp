@@ -170,4 +170,20 @@ export class DataBaseFacadeService {
       this._loading.next(false);
     }
   }
+
+
+  async addExceptionToSchedule(scheduleId: string, exception: { startDate: Date; endDate: Date }): Promise<void> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      await this.dbService.addExceptionToSchedule(scheduleId, exception);
+    } catch (error) {
+      this._error.next('Failed to add exception');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+  
 }

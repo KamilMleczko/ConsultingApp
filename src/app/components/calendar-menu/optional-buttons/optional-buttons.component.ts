@@ -25,6 +25,8 @@ export class OptionalButtonsComponent {
   showForm = false;
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   doctorId = 'sample-doctor-id'; // Hardcoded for now
+  showExceptionForm = false;
+  currentScheduleId: string | null = null;
 
   showSingleDayForm = false;
   singleDayForm = this.fb.group({
@@ -207,7 +209,131 @@ export class OptionalButtonsComponent {
     }
   }
 
-
-
+  exceptionForm = this.fb.group({
+    startDate: ['', Validators.required],
+    endDate: ['', Validators.required]
+  });
   
+  toggleExceptionForm(scheduleId: string) {
+    this.currentScheduleId = scheduleId;
+    this.showExceptionForm = !this.showExceptionForm;
+    if (!this.showExceptionForm) {
+      this.exceptionForm.reset();
+      this.currentScheduleId = null;
+    }
+  }
+  
+  private isDateInRange(date: Date, startDate: Date, endDate: Date): boolean {
+    return date >= startDate && date <= endDate;
+  }
+  
+  private doExceptionsOverlap(exception1Start: Date, exception1End: Date, exception2Start: Date, exception2End: Date): boolean {
+    return (exception1Start <= exception2End && exception1End >= exception2Start);
+  }
+  
+  async submitException() {
+    if (this.exceptionForm.valid && this.currentScheduleId) {
+      const formValue = this.exceptionForm.value;
+      const startDate = new Date(formValue.startDate!);
+      const endDate = new Date(formValue.endDate!);
+  
+      // Find the current schedule
+      const schedule = this.schedules.find(s => s.id === this.currentScheduleId);
+      if (!schedule) {
+        alert('Schedule not found');
+        return;
+      }
+  
+      // Check if exception dates are within schedule period
+      const schedulePeriod = schedule.schedulePeriods[0]; // As mentioned, currently always one element
+      const scheduleStart = schedulePeriod.startDate.toDate();
+      const scheduleEnd = schedulePeriod.endDate.toDate();
+  
+      if (!this.isDateInRange(startDate, scheduleStart, scheduleEnd) || 
+          !this.isDateInRange(endDate, scheduleStart, scheduleEnd)) {
+        alert('Exception dates must be within the schedule period');
+        return;
+      }
+  
+      // Check for overlap with existing exceptions
+      const hasOverlap = schedule.exceptions.some(existing => 
+        this.doExceptionsOverlap(
+          startDate,
+          endDate,
+          existing.startDate.toDate(),
+          existing.endDate.toDate()
+        )
+      );
+  
+      if (hasOverlap) {
+        alert('This exception overlaps with an existing exception');
+        return;
+      }
+  
+      try {
+        await this.dbFacade.addExceptionToSchedule(this.currentScheduleId, {
+          startDate,
+          endDate
+        });
+        
+        this.exceptionForm.reset();
+        this.showExceptionForm = false;
+        this.currentScheduleId = null;
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        alert('Exception added successfully');
+      } catch (error) {
+        alert('Error adding exception');
+      }
+    }
+  }
+
+  showExceptionsList = false;
+  allExceptions: { 
+    scheduleId: string, 
+    exceptions: { 
+      startDate: Date, 
+      endDate: Date 
+    }[] 
+  }[] = [];
+
+  async toggleExceptionsList() {
+    this.showExceptionsList = !this.showExceptionsList;
+    if (this.showExceptionsList) {
+      try {
+        // Fetch schedules if not already loaded
+        if (this.schedules.length === 0) {
+          this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        }
+        
+        // Transform schedules data to get exceptions
+        this.allExceptions = this.schedules
+          .filter(schedule => schedule.exceptions.length > 0)
+          .map(schedule => ({
+            scheduleId: schedule.id,
+            exceptions: schedule.exceptions.map(exception => ({
+              startDate: exception.startDate.toDate(),
+              endDate: exception.endDate.toDate()
+            }))
+          }));
+      } catch (error) {
+        console.error('Error fetching exceptions:', error);
+      }
+    }
+  }
+
+  hideExceptions() {
+    this.showExceptionsList = false;
+  }
+
+  // Helper method to get schedule period dates for display
+  getSchedulePeriodDates(scheduleId: string): { start: Date, end: Date } | null {
+    const schedule = this.schedules.find(s => s.id === scheduleId);
+    if (schedule && schedule.schedulePeriods.length > 0) {
+      return {
+        start: schedule.schedulePeriods[0].startDate.toDate(),
+        end: schedule.schedulePeriods[0].endDate.toDate()
+      };
+    }
+    return null;
+  }
 }
