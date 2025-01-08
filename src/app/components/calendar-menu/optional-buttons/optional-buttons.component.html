@@ -1,121 +1,121 @@
-  <div class="button-container">
-    <button (click)="toggleSingleDayForm()" class="btn btn-primary m-3">
-      Add Single Day Schedule
-    </button>
+<div class="button-container">
+  <button (click)="toggleSingleDayForm()" class="btn btn-primary m-3">
+    Add Single Day Schedule
+  </button>
 
-    <button (click)="toggleForm()" class="btn btn-primary m-3">
-      Add Doctor Schedule
-    </button>
+  <button (click)="toggleForm()" class="btn btn-primary m-3">
+    Add Doctor Schedule
+  </button>
 
-    <button (click)="toggleSchedules()" class="btn btn-primary m-3">
-      Show Schedules
-    </button>
-  </div>
+  <button (click)="toggleSchedules()" class="btn btn-primary m-3">
+    Show Schedules
+  </button>
+</div>
 
-  <div *ngIf="showForm" class="schedule-form-overlay">
-    <div class="schedule-form-container">
-      <form [formGroup]="scheduleForm"  (ngSubmit)="scheduleForm.valid" class="schedule-form">
-        <div class="form-group mb-3">
-          <label for="startDate">Start Date</label>
-          <input type="date" id="startDate" formControlName="startDate" class="form-control">
-        </div>
-  
-        <div class="form-group mb-3">
-          <label for="endDate">End Date</label>
-          <input type="date" id="endDate" formControlName="endDate" class="form-control">
-        </div>
-  
-        <div formGroupName="weeklyAvailability">
-          <h4>Weekly Schedule</h4>
-          <ng-container *ngFor="let day of weekDays">
-            <div [formGroupName]="day.toLowerCase()" class="day-group mb-3">
-              <label>{{ day }}</label>
-              <div class="time-inputs">
-                <input type="time" [formControlName]="'start'" class="form-control">
-                <input type="time" [formControlName]="'end'" class="form-control">
-              </div>
+<div *ngIf="showForm" class="schedule-form-overlay">
+  <div class="schedule-form-container">
+    <form [formGroup]="scheduleForm"  (ngSubmit)="scheduleForm.valid" class="schedule-form">
+      <div class="form-group mb-3">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" formControlName="startDate" class="form-control">
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="endDate">End Date</label>
+        <input type="date" id="endDate" formControlName="endDate" class="form-control">
+      </div>
+
+      <div formGroupName="weeklyAvailability">
+        <h4>Weekly Schedule</h4>
+        <ng-container *ngFor="let day of weekDays">
+          <div [formGroupName]="day.toLowerCase()" class="day-group mb-3">
+            <label>{{ day }}</label>
+            <div class="time-inputs">
+              <input type="time" [formControlName]="'start'" class="form-control">
+              <input type="time" [formControlName]="'end'" class="form-control">
             </div>
-          </ng-container>
-        </div>
-  
-        
-        <button (click) = "submitSchedule()" [disabled]="!scheduleForm.valid" class="btn btn-success m-2">
-          Submit Schedule
-        </button>
-        
-        <button (click)="toggleForm()" class="btn btn-primary m-2 ">
-          Cancel
-        </button>
-      </form>
-    </div>
+          </div>
+        </ng-container>
+      </div>
+
+      
+      <button (click) = "submitSchedule()" [disabled]="!scheduleForm.valid" class="btn btn-success m-2">
+        Submit Schedule
+      </button>
+      
+      <button (click)="toggleForm()" class="btn btn-primary m-2 ">
+        Cancel
+      </button>
+    </form>
   </div>
+</div>
 
 
- 
 
-  <div *ngIf="showSchedules" class="schedule-list-overlay">
-      <div class="schedules-content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3>Doctor Schedules</h3>
-          <button (click)="hideSchedules()" class="btn btn-sm btn-secondary">
-            Hide
-          </button>
 
-          
-        </div>
+<div *ngIf="showSchedules" class="schedule-list-overlay">
+    <div class="schedules-content">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Doctor Schedules</h3>
+        <button (click)="hideSchedules()" class="btn btn-sm btn-secondary">
+          Hide
+        </button>
+
         
-        <div *ngIf="loading$ | async" class="text-center">
-          Loading schedules...
-        </div>
-        
-        <div *ngIf="error$ | async as error" class="alert alert-danger">
-          {{ error }}
-        </div>
-        
-        <div *ngFor="let schedule of schedules" class="schedule-item mb-3">
-          <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule.id)">
-            Delete Schedule
-          </button>
-          <div *ngFor="let period of schedule.schedulePeriods" class="card">
-            <div class="card-body">
-              <h5 class="card-title">Schedule Period</h5>
-              <p>Start: {{ period.startDate.toDate() | date:'mediumDate' }}</p>
-              <p>End: {{ period.endDate.toDate() | date:'mediumDate' }}</p>
-              
-              <div *ngFor="let day of getAvailableDays(period.weeklyAvailability)" class="mb-2">
-                <strong>{{ day | titlecase }}:</strong> 
-                {{ ($any(period.weeklyAvailability))[day].start }} - {{ ($any(period.weeklyAvailability))[day].end }}
-              </div>
+      </div>
+      
+      <div *ngIf="loading$ | async" class="text-center">
+        Loading schedules...
+      </div>
+      
+      <div *ngIf="error$ | async as error" class="alert alert-danger">
+        {{ error }}
+      </div>
+      
+      <div *ngFor="let schedule of schedules" class="schedule-item mb-3">
+        <button class="btn btn-danger btn-sm" (click)="deleteSchedule(schedule.id)">
+          Delete Schedule
+        </button>
+        <div *ngFor="let period of schedule.schedulePeriods" class="card">
+          <div class="card-body">
+            <h5 class="card-title">Schedule Period</h5>
+            <p>Start: {{ period.startDate.toDate() | date:'mediumDate' }}</p>
+            <p>End: {{ period.endDate.toDate() | date:'mediumDate' }}</p>
+            
+            <div *ngFor="let day of getAvailableDays(period.weeklyAvailability)" class="mb-2">
+              <strong>{{ day | titlecase }}:</strong> 
+              {{ ($any(period.weeklyAvailability))[day].start }} - {{ ($any(period.weeklyAvailability))[day].end }}
             </div>
           </div>
         </div>
       </div>
-  </div>
-
-
-  <div *ngIf="showSingleDayForm" class="schedule-form-overlay">
-    <div class="schedule-form-container">
-      <form [formGroup]="singleDayForm" (ngSubmit)="submitSingleDay()" class="schedule-form">
-        <div class="form-group mb-3">
-          <label for="date">Date</label>
-          <input type="date" id="date" formControlName="date" class="form-control">
-        </div>
-  
-        <div class="form-group mb-3">
-          <label>Time Range</label>
-          <div class="d-flex gap-2">
-            <input type="time" formControlName="start" class="form-control">
-            <input type="time" formControlName="end" class="form-control">
-          </div>
-        </div>
-  
-        <button type="button" (click)="submitSingleDay()" [disabled]="!singleDayForm.valid" class="btn btn-success m-2">
-          Submit
-        </button>
-        
-        <button type="button" (click)="toggleSingleDayForm()" class="btn btn-primary m-2">
-          Cancel
-        </button>
-      </form>
     </div>
+</div>
+
+
+<div *ngIf="showSingleDayForm" class="schedule-form-overlay">
+  <div class="schedule-form-container">
+    <form [formGroup]="singleDayForm" (ngSubmit)="submitSingleDay()" class="schedule-form">
+      <div class="form-group mb-3">
+        <label for="date">Date</label>
+        <input type="date" id="date" formControlName="date" class="form-control">
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Time Range</label>
+        <div class="d-flex gap-2">
+          <input type="time" formControlName="start" class="form-control">
+          <input type="time" formControlName="end" class="form-control">
+        </div>
+      </div>
+
+      <button type="button" (click)="submitSingleDay()" [disabled]="!singleDayForm.valid" class="btn btn-success m-2">
+        Submit
+      </button>
+      
+      <button type="button" (click)="toggleSingleDayForm()" class="btn btn-primary m-2">
+        Cancel
+      </button>
+    </form>
   </div>
+</div>

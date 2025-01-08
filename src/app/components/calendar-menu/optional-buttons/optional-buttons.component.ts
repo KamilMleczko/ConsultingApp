@@ -71,11 +71,12 @@ export class OptionalButtonsComponent {
           const periodStart = period.startDate.toDate();
           const periodEnd = period.endDate.toDate();
           
+          
           // Check if dates overlap
           if (
             (startDate <= periodEnd && startDate >= periodStart) || // New start date falls within existing period
             (endDate <= periodEnd && endDate >= periodStart) || // New end date falls within existing period
-            (startDate <= periodStart && endDate >= periodEnd) // New period completely encompasses existing period
+            (startDate <= periodStart && endDate >= periodEnd)// New period completely encompasses existing period
           ) {
             return true; // Overlap found
           }
@@ -171,6 +172,13 @@ export class OptionalButtonsComponent {
     if (this.singleDayForm.valid) {
       const formValue = this.singleDayForm.value;
       const date = new Date(formValue.date!);
+
+      
+      const hasOverlap = await this.checkScheduleOverlap(date, date);
+      if (hasOverlap) {
+        alert('This schedule overlaps with an existing schedule. Please choose different dates.');
+        return;
+      }
   
       try {
         await this.dbFacade.addSingleDaySchedule(this.doctorId, date, {
@@ -198,5 +206,3 @@ export class OptionalButtonsComponent {
     }
   }
 }
-
-
