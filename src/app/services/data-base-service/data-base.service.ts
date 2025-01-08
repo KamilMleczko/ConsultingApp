@@ -1,3 +1,4 @@
+import { TimeRange } from './../../interfaces/firestoreTypes';
 
 
 import { Injectable, inject } from '@angular/core';
@@ -5,7 +6,7 @@ import { Firestore, Timestamp, collection,
         addDoc, doc, setDoc, 
         deleteDoc, query, where, 
         getDocs,updateDoc, arrayUnion } from '@angular/fire/firestore';
-import { DoctorSchedule, User, Appointment, TimeRange, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId } from '../../interfaces/firestoreTypes';
+import { DoctorSchedule, User, Appointment, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId } from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -146,137 +147,6 @@ export class DataBaseService {
     }
   }
 
-
-  async addExceptionToDoctorSchedule(
-    scheduleId: string,
-    exception: {
-      date: Date;
-      available: boolean;
-      customHours?: TimeRange;
-    }
-  ): Promise<void> {
-    try {
-      const scheduleRef = doc(this.firestore, 'doctorSchedules', scheduleId);
-      
-      const exceptionWithTimestamp = {
-        ...exception,
-        date: Timestamp.fromDate(exception.date)
-      };
-
-      await updateDoc(scheduleRef, {
-        exceptions: arrayUnion(exceptionWithTimestamp)
-      });
-    } catch (error) {
-      console.error('Error adding exception to doctor schedule:', error);
-      throw new Error('Failed to add exception to doctor schedule');
-    }
-  }
-
-  // Appointment Operations
-  async addAppointment(appointmentData: Omit<Appointment, 'dateTime'> & { dateTime: Date }): Promise<string> {
-    try {
-      const appointmentWithTimestamp: Appointment = {
-        ...appointmentData,
-        dateTime: Timestamp.fromDate(appointmentData.dateTime)
-      };
-
-      const docRef = await addDoc(
-        collection(this.firestore, 'appointments'),
-        appointmentWithTimestamp
-      );
-      
-      return docRef.id;
-    } catch (error) {
-      console.error('Error adding appointment:', error);
-      throw new Error('Failed to add appointment');
-    }
-  }
-
-  async removeAppointment(appointmentId: string): Promise<void> {
-    try {
-      await deleteDoc(doc(this.firestore, 'appointments', appointmentId));
-    } catch (error) {
-      console.error('Error removing appointment:', error);
-      throw new Error('Failed to remove appointment');
-    }
-  }
-
-  async createSampleData() {
-    // Create a doctor
-    const doctorData: Omit<User, 'createdAt'> = {
-      email: 'doctor@example.com',
-      displayName: 'Dr. Smith',
-      role: 'doctor',
-      specialization: 'General Practice',
-      age: 45,
-      sex: 'male'
-    };
-    const doctorRef = await addDoc(collection(this.firestore, 'users'), 
-      { ...doctorData, createdAt: Timestamp.now() }
-    );
-    const doctorId = doctorRef.id;
-
-    // Create a patient
-    const patientData: Omit<User, 'createdAt'> = {
-      email: 'patient@example.com',
-      displayName: 'John Doe',
-      role: 'patient',
-      phoneNumber: '123-456-789',
-      age: 30,
-      sex: 'male'
-    };
-    const patientRef = await addDoc(collection(this.firestore, 'users'),
-      { ...patientData, createdAt: Timestamp.now() }
-    );
-    const patientId = patientRef.id;
-
-    // Create doctor's schedule with multiple periods
-    const scheduleData: DoctorScheduleWithoutId = {
-      doctorId: doctorId,
-      schedulePeriods:
-        [{
-          startDate: Timestamp.fromDate(new Date('2025-03-05')),
-          endDate: Timestamp.fromDate(new Date('2025-04-07')),
-          weeklyAvailability: {
-            monday: { start: '16:00', end: '19:00' },
-            wednesday: { start: '09:00', end: '17:00' },
-            friday: { start: '10:00', end: '15:00' }
-          }
-        }
-        
-      ],
-      exceptions: []
-    };
-
-    await addDoc(collection(this.firestore, 'doctorSchedules'), scheduleData);
-
-    const appointmentsData = [
-      {
-        doctorId: doctorId,
-        patientId: patientId,
-        dateTime: Timestamp.fromDate(new Date('2025-03-06T16:30:00')), // Wednesday during first schedule period
-        duration: 30,
-        status: 'scheduled',
-        type: 'initial consultation',
-        notes: 'First visit'
-      },
-      {
-        doctorId: doctorId,
-        patientId: patientId,
-        dateTime: Timestamp.fromDate(new Date('2025-04-10T10:00:00')), // Thursday during second schedule period
-        duration: 45,
-        status: 'scheduled',
-        type: 'follow-up',
-        notes: 'Follow-up appointment'
-      }
-    ];
-
-    // Add all appointments
-    for (const appointmentData of appointmentsData) {
-      await addDoc(collection(this.firestore, 'appointments'), appointmentData);
-    }
-  }
-
   async deleteAllData() {
    
       // Delete all users
@@ -323,7 +193,7 @@ export class DataBaseService {
     daySchedule: { start: string; end: string; }
   ): Promise<string> {
     try {
-      const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
+      const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
       const weeklyAvailability: WeeklySchedule = {
         [dayOfWeek]: { start: daySchedule.start, end: daySchedule.end }
       };
@@ -332,7 +202,7 @@ export class DataBaseService {
         
         doctorId,
         schedulePeriods: [{
-          startDate: Timestamp.fromDate(date),
+          startDate: Timestamp.fromDate(date), 
           endDate: Timestamp.fromDate(date),
           weeklyAvailability
         }],

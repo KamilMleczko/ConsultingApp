@@ -68,6 +68,23 @@ export class DataBaseFacadeService {
     }
   }
 
+
+  async addSingleDaySchedule(
+    doctorId: string,
+    date: Date,
+    daySchedule: { start: string; end: string; }
+  ): Promise<string> {
+    this._loading.next(true);
+    this._error.next(null);
+    try {
+      return await this.dbService.addSingleDaySchedule(doctorId, date, daySchedule);
+    } catch (error) {
+      this._error.next('Failed to add single day schedule');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
   async addSchedulePeriod(
     scheduleId: string,
     periodData: {
@@ -139,22 +156,7 @@ export class DataBaseFacadeService {
   }
 
   
-  async addSingleDaySchedule(
-    doctorId: string,
-    date: Date,
-    daySchedule: { start: string; end: string; }
-  ): Promise<string> {
-    this._loading.next(true);
-    this._error.next(null);
-    try {
-      return await this.dbService.addSingleDaySchedule(doctorId, date, daySchedule);
-    } catch (error) {
-      this._error.next('Failed to add single day schedule');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
+ 
 
   async removeDoctorScheduleById(scheduleId: string): Promise<void> {
     this._loading.next(true);
