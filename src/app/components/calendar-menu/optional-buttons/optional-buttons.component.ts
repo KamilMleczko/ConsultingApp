@@ -25,6 +25,14 @@ export class OptionalButtonsComponent {
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   doctorId = 'sample-doctor-id'; // Hardcoded for now
 
+  showSingleDayForm = false;
+  singleDayForm = this.fb.group({
+  date: ['', Validators.required],
+  start: ['', Validators.required],
+  end: ['', Validators.required]
+  });
+
+
   scheduleForm = this.fb.group({
     startDate: ['', Validators.required],
     endDate: ['', Validators.required],
@@ -121,6 +129,7 @@ export class OptionalButtonsComponent {
         
         this.scheduleForm.reset();
         this.showForm = false;
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
         alert('Schedule added successfully');
       } catch (error) {
         if (error instanceof Error) {
@@ -136,13 +145,15 @@ export class OptionalButtonsComponent {
 
   async toggleSchedules() {
     this.showSchedules = !this.showSchedules;
-    if (this.showSchedules && this.schedules.length === 0) {
+      console.log('Fetching schedules...');
       try {
         this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
       } catch (error) {
         console.error('Error fetching schedules:', error);
       }
-    }
+  }
+  hideSchedules() {
+    this.showSchedules = false;
   }
   
   getAvailableDays(weeklyAvailability: WeeklySchedule): string[] {
@@ -150,4 +161,42 @@ export class OptionalButtonsComponent {
       .filter(([_, times]) => times && times.start && times.end)
       .map(([day]) => day);
   }
+
+
+  toggleSingleDayForm() {
+    this.showSingleDayForm = !this.showSingleDayForm;
+  }
+  
+  async submitSingleDay() {
+    if (this.singleDayForm.valid) {
+      const formValue = this.singleDayForm.value;
+      const date = new Date(formValue.date!);
+  
+      try {
+        await this.dbFacade.addSingleDaySchedule(this.doctorId, date, {
+          start: formValue.start!,
+          end: formValue.end!
+        });
+        
+        this.singleDayForm.reset();
+        this.showSingleDayForm = false;
+        alert('Single day schedule added successfully');
+      } catch (error) {
+        alert('Error adding single day schedule');
+      }
+    }
+  }
+
+  async deleteSchedule(scheduleId : string) {
+    if (confirm('Are you sure you want to delete this schedule?')) {
+      try {
+        await this.dbFacade.removeDoctorScheduleById(scheduleId);
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+      } catch (error) {
+        console.error('Error deleting schedule:', error);
+      }
+    }
+  }
 }
+
+
