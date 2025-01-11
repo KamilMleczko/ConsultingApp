@@ -53,15 +53,27 @@ export interface User {
     endDate: Timestamp;
   }
 export interface Appointment {
+    id: string;
     doctorId: string;
     patientId: string;
     dateTime: Timestamp; //np. 2022-12-31T12:00:00.000Z
     timeRange: TimeRange; //np. {start: '12:00', end: '13:00'}
     duration: number;
     status: AppointmentStatus
-    type: string;
+    type: AppointmentType;
     notes?: string;
 }
 
+export interface AppointmentWithoutId {
+  doctorId: string;
+  patientId: string;
+  dateTime: Timestamp; //np. 2022-12-31T12:00:00.000Z
+  timeRange: TimeRange; //np. {start: '12:00', end: '13:00'}
+  duration: number;
+  status: AppointmentStatus
+  type: AppointmentType;
+  notes?: string;
+}
+export type AppointmentType = 'first' | 'follow-up'| 'control' ;
 export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
 export type Sex = 'male' | 'female' | 'other';

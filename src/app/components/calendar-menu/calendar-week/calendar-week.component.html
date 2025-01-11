@@ -19,17 +19,60 @@
           </td>
           <td *ngFor="let daySlot of slot.daySlots"
               class="calendar-cell"
-              [class.available]="daySlot.available && !isDateInException(getDayDateForException(daySlot.day))"
-              [class.exception]="isDateInException(getDayDateForException(daySlot.day))"
+              [class.available]="daySlot.available && !daySlot.outdated"
+              [class.exception]="daySlot.exception"
               [class.current-day]="isCurrentDay(daySlot.day)"
               [class.current-time]="isCurrentTime(daySlot.time)"
+              [class.scheduled]="daySlot.appointment?.status === 'scheduled' && !daySlot.available"
+              [class.completed]="daySlot.appointment?.status === 'completed' && !daySlot.available"
+              [class.cancelled]="daySlot.appointment?.status === 'cancelled' && !daySlot.available"
+              [class.outdated]="daySlot.outdated"
+              [class.follow-up]="daySlot.appointment?.type === 'follow-up' "
+              [class.first] = "daySlot.appointment?.type === 'first'"
+              [class.control] = "daySlot.appointment?.type === 'control'"
               [attr.data-time]="daySlot.time"
               [attr.data-day]="daySlot.day"
               [attr.data-date]="daySlot.date"
-              (click)="onCellClick(daySlot)">
+              (click)="onCellClick(daySlot)"
+              [title]="daySlot.appointment ? 
+              'Type: ' + daySlot.appointment.type + '\n' +
+              'Time: ' + daySlot.appointment.timeRange.start + ' - ' + daySlot.appointment.timeRange.end + '\n' +
+              'Duration: ' + daySlot.appointment.duration + ' min' +
+              (daySlot.appointment.notes ? '\nNotes: ' + daySlot.appointment.notes : '')
+              : ''">
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<div *ngIf="showAppointmentForm" class="appointment-form-overlay">
+  <div class="appointment-form-container">
+    <form [formGroup]="appointmentForm" (ngSubmit)="submitAppointment()" class="appointment-form">
+      <h4>Schedule Appointment</h4>
+      <div class="form-group mb-3">
+        <label for="type">Appointment Type</label>
+        <select id="type" formControlName="type" class="form-control">
+          <option value="">Select Type</option>
+          <option value="first">First Appointment</option>
+          <option value="follow-up">Follow-up Appointment</option>
+          <option value="control">Control Visit</option>
+        </select>
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="notes">Notes (Optional)</label>
+        <textarea id="notes" formControlName="notes" class="form-control"></textarea>
+      </div>
+
+      <button type="submit" [disabled]="!appointmentForm.valid" class="btn btn-success m-2">
+        Schedule
+      </button>
+      
+      <button type="button" (click)="showAppointmentForm = false" class="btn btn-secondary m-2">
+        Cancel
+      </button>
+    </form>
   </div>
 </div>

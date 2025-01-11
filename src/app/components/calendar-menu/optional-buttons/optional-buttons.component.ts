@@ -281,6 +281,7 @@ export class OptionalButtonsComponent {
         this.showExceptionForm = false;
         this.currentScheduleId = null;
         this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        
         alert('Exception added successfully');
       } catch (error) {
         alert('Error adding exception');

@@ -6,7 +6,9 @@ import { Firestore, Timestamp, collection,
         addDoc, doc, setDoc, 
         deleteDoc, query, where, 
         getDocs,updateDoc, arrayUnion , arrayRemove} from '@angular/fire/firestore';
-import { DoctorSchedule, User, Appointment, WeeklySchedule, SchedulePeriod,DoctorScheduleWithoutId, Exception} from '../../interfaces/firestoreTypes';
+import { DoctorSchedule, User, Appointment, WeeklySchedule, 
+  SchedulePeriod,DoctorScheduleWithoutId, Exception, 
+  AppointmentStatus, AppointmentWithoutId} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -87,6 +89,10 @@ export class DataBaseService {
       weeklyAvailability: WeeklySchedule;
     }
   ): Promise<string> {
+
+    
+    scheduleData.endDate = new Date(scheduleData.endDate);
+    scheduleData.endDate.setHours(23, 59, 0, 0);
     try {
       const schedulePeriod: SchedulePeriod = {
         startDate: Timestamp.fromDate(scheduleData.startDate),
@@ -118,32 +124,6 @@ export class DataBaseService {
     } catch (error) {
       console.error('Error removing doctor schedule:', error);
       throw new Error('Failed to remove doctor schedule');
-    }
-  }
-
-  async addSchedulePeriod(
-    scheduleId: string,
-    periodData: {
-      startDate: Date;
-      endDate: Date;
-      weeklyAvailability: WeeklySchedule;
-    }
-  ): Promise<void> {
-    try {
-      const scheduleRef = doc(this.firestore, 'doctorSchedules', scheduleId);
-      
-      const newPeriod: SchedulePeriod = {
-        startDate: Timestamp.fromDate(periodData.startDate),
-        endDate: Timestamp.fromDate(periodData.endDate),
-        weeklyAvailability: periodData.weeklyAvailability
-      };
-
-      await updateDoc(scheduleRef, {
-        schedulePeriods: arrayUnion(newPeriod)
-      });
-    } catch (error) {
-      console.error('Error adding schedule period:', error);
-      throw new Error('Failed to add schedule period');
     }
   }
 
@@ -192,6 +172,8 @@ export class DataBaseService {
     date: Date,
     daySchedule: { start: string; end: string; }
   ): Promise<string> {
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 0, 0); 
     try {
       const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
       const weeklyAvailability: WeeklySchedule = {
@@ -203,7 +185,7 @@ export class DataBaseService {
         doctorId,
         schedulePeriods: [{
           startDate: Timestamp.fromDate(date), 
-          endDate: Timestamp.fromDate(date),
+          endDate: Timestamp.fromDate(endDate),
           weeklyAvailability
         }],
         exceptions: []
@@ -255,6 +237,92 @@ export class DataBaseService {
     } catch (error) {
       console.error('Error removing exception:', error);
       throw new Error('Failed to remove exception');
+    }
+  }
+
+  async addAppointment(appointmentData: Omit<AppointmentWithoutId, 'status'>): Promise<string> {
+    try {
+      const appointment: AppointmentWithoutId = {
+        ...appointmentData,
+        status: 'scheduled'
+      };
+      
+      const docRef = await addDoc(
+        collection(this.firestore, 'appointments'),
+        appointment
+      );
+      
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding appointment:', error);
+      throw new Error('Failed to add appointment');
+    }
+  }
+  
+  async getAppointmentsForDay(doctorId: string, date: Date): Promise<Appointment[]> {
+    try {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const appointmentsRef = collection(this.firestore, 'appointments');
+      const q = query(
+        appointmentsRef,
+        where('doctorId', '==', doctorId),
+        where('dateTime', '>=', Timestamp.fromDate(startOfDay)),
+        where('dateTime', '<=', Timestamp.fromDate(endOfDay))
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as unknown as Appointment[];
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw new Error('Failed to fetch appointments');
+    }
+  }
+  
+  async updateAppointmentStatus(appointmentId: string, status: AppointmentStatus): Promise<void> {
+    try {
+      const appointmentRef = doc(this.firestore, 'appointments', appointmentId);
+      await updateDoc(appointmentRef, { status });
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      throw new Error('Failed to update appointment status');
+    }
+  }
+  
+  async removeAppointment(appointmentId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(this.firestore, 'appointments', appointmentId));
+    } catch (error) {
+      console.error('Error removing appointment:', error);
+      throw new Error('Failed to remove appointment');
+    }
+  }
+
+
+  async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
+    try {
+      const appointmentsRef = collection(this.firestore, 'appointments');
+      const q = query(
+        appointmentsRef,
+        where('patientId', '==', patientId),
+        where('status', '==', 'scheduled')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as unknown as Appointment[];
+    } catch (error) {
+      console.error('Error fetching patient appointments:', error);
+      throw new Error('Failed to fetch patient appointments');
     }
   }
 }

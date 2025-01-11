@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataBaseService } from '../data-base-service/data-base.service';
-import { User, Appointment, WeeklySchedule , DoctorSchedule, Exception} from '../../interfaces/firestoreTypes';
+import { User, Appointment, WeeklySchedule , DoctorSchedule, Exception, AppointmentStatus, AppointmentWithoutId} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -85,27 +85,7 @@ export class DataBaseFacadeService {
       this._loading.next(false);
     }
   }
-  async addSchedulePeriod(
-    scheduleId: string,
-    periodData: {
-      startDate: Date;
-      endDate: Date;
-      weeklyAvailability: WeeklySchedule;
-    }
-  ): Promise<void> {
-    this._loading.next(true);
-    this._error.next(null);
-    
-    try {
-      await this.dbService.addSchedulePeriod(scheduleId, periodData);
-    } catch (error) {
-      this._error.next('Failed to add schedule period');
-      throw error;
-    } finally {
-      this._loading.next(false);
-    }
-  }
-
+  
 
   async removeDoctorSchedule(scheduleId: string): Promise<void> {
     this._loading.next(true);
@@ -200,4 +180,75 @@ export class DataBaseFacadeService {
     }
   }
   
+
+  async addAppointment(appointmentData: Omit<AppointmentWithoutId, 'status'>): Promise<string> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.addAppointment(appointmentData);
+    } catch (error) {
+      this._error.next('Failed to add appointment');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+  
+  async getAppointmentsForDay(doctorId: string, date: Date): Promise<Appointment[]> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getAppointmentsForDay(doctorId, date);
+    } catch (error) {
+      this._error.next('Failed to fetch appointments');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+  
+  async updateAppointmentStatus(appointmentId: string, status: AppointmentStatus): Promise<void> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      await this.dbService.updateAppointmentStatus(appointmentId, status);
+    } catch (error) {
+      this._error.next('Failed to update appointment status');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+  
+  async removeAppointment(appointmentId: string): Promise<void> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      await this.dbService.removeAppointment(appointmentId);
+    } catch (error) {
+      this._error.next('Failed to remove appointment');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+
+
+  async getAppointmentsByPatientId(patientId: string): Promise<Appointment[]> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getAppointmentsByPatientId(patientId);
+    } catch (error) {
+      this._error.next('Failed to fetch patient appointments');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
 }

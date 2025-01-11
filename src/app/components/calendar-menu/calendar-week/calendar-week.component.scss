@@ -67,10 +67,7 @@
   }
 }
 
-.calendar-cell:hover {
-  background-color: #eceff1;
-  transition: all 0.3s ease;
-}
+
 
 .sticky-header {
   position: sticky;
@@ -106,26 +103,81 @@ td {
   border: 2px solid #007bff;
 }
 
-.calendar-cell.available {
+
+
+
+.calendar-cell:hover {
+  background-color: #eceff1;
+  transition: all 0.3s ease;
+}
+.calendar-cell {
+
+  &.available {
   background-color: #8ed68e;
   transition: transform 0.2s ease-in-out;
+    &:hover {
+      background-color: #45c845;
+      transform: scale(1.05);
+    }
+  }
 
-}
-
-.calendar-cell.exception {
+  &.exception {
   background-color: #d30000;
   transition: transform 0.2s ease-in-out;
 
-}
+  }
+  &.scheduled {
+    background-color: #006400; /* Dark green */
+    color: white;
+    &.follow-up {
+      background-color: #FFD700 !important; /* Gold */ 
+    }
+    &.first {
+      background-color: #192fba !important; /* Gold */ 
+    }
+    &.control {
+      background-color: #b915a6 !important; /* Gold */ 
+    }
+  }
 
+  &.completed {
+    background-color: #98FB98; /* Gray/green */
+  }
 
+  &.cancelled {
+    background-color: #8B0000; /* Dark red */
+    color: white;
+  }
 
-.calendar-cell.calendar-cell.available:hover {
+  &.outdated {
+    background-color: #D3D3D3; /* Light gray */
+  }
   
-  background-color: #45c845;
-  transform: scale(1.05) ;
-
 }
-// .calendar-cell:not(.available) { //maybe will use later
-//   background-color: #b92f2f;
-// }
+
+.appointment-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.appointment-form-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

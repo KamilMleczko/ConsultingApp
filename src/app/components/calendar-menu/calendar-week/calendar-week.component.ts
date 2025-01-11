@@ -1,8 +1,16 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
-import { WeeklySchedule, DoctorSchedule, SchedulePeriod } from '../../../interfaces/firestoreTypes';
-import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { WeeklySchedule, DoctorSchedule, SchedulePeriod, 
+  Appointment, AppointmentWithoutId , AppointmentStatus,
+  AppointmentType
+} from '../../../interfaces/firestoreTypes';
+import { Firestore, collection, query, where, getDocs, Timestamp } from '@angular/fire/firestore';
 import { DataBaseFacadeService } from '../../../services/data-base-facade-service/data-base-facade.service';
+import { FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+
 
 interface TimeSlot {
   time: string;
@@ -15,15 +23,18 @@ interface DaySlot {
   time: string;
   date: number;
   appointmentCount: number;
+  appointment?: Appointment;
   available: boolean;
-  events?: any[];
+  outdated: boolean;
+  exception : boolean;
+  
 }
 
 
 @Component({
   selector: 'app-calendar-week',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './calendar-week.component.html',
   styleUrl: './calendar-week.component.scss'
 })
@@ -37,21 +48,35 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   private firestore: Firestore = inject(Firestore);
   schedules: DoctorSchedule[] = [];
   private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
+  private fb = inject(FormBuilder);
 
   doctorId: string = 'sample-doctor-id'; // TODO: Replace in authorisation phase with userID
   currentSchedule: WeeklySchedule | null = null;
 
+  showAppointmentForm = false;
+  currentSlot: DaySlot | null = null;
+  appointmentForm = this.fb.group({
+    type: ['', Validators.required],
+    notes: ['']
+  });
+  appointments: Appointment[] = [];
+
   async ngOnInit():  Promise<void>{
     await this.updateScheduleForCurrentWeek();
-    this.generateTimeSlots();
+    
+    await this.generateTimeSlots();
   }
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['receivedDate'] && !changes['receivedDate'].firstChange) {
+      console.log('Received date changed:', changes['receivedDate'].currentValue);
       this.currentDate = new Date(changes['receivedDate'].currentValue);
       await this.updateScheduleForCurrentWeek();
-      this.generateTimeSlots();
+      
+      await this.generateTimeSlots();
     }
   }
+
+
 
   private async updateScheduleForCurrentWeek(): Promise<void> {
     const monday = this.getMonday(this.currentDate);
@@ -103,8 +128,9 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     
     return timeMinutes >= startMinutes2 && timeMinutes < endMinutes2;
   }
-  private generateTimeSlots(): void {
+   private  async generateTimeSlots(): Promise<void> {
     this.timeSlots = [];
+    await this.loadAppointments();
     const monday = this.getMonday(this.currentDate);
 
     for (let hour = 0; hour < 24; hour++) {
@@ -119,16 +145,25 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
           const dayName = this.weekDays[day].toLowerCase() as keyof WeeklySchedule;
           const daySchedule = this.currentSchedule?.[dayName];
           const isException = this.isDateInException(currentDate);
-          const isAvailable = !isException && this.isDateTimeInSchedule(currentDate, timeString);
-          
+
+          const isOutdated = this.isDateTimeInPast(currentDate, timeString) 
+          && !isException && this.isDateTimeInSchedule(currentDate, timeString) 
+          && !this.isDateTimeInAppointment(currentDate, timeString);
+
+          const isAvailable = !isException && this.isDateTimeInSchedule(currentDate, timeString) 
+          && !this.isDateTimeInAppointment(currentDate, timeString)
+          const type = 
+
           daySlots.push({
-            day,
-            time: timeString,
-            date: currentDate.getDate(),
-            appointmentCount: 0,
-            available: isAvailable ,//this.isTimeInRange(timeString, daySchedule) && !isException,
-            events: []
+              day,
+              time: timeString,
+              date: currentDate.getDate(),
+              appointmentCount: 0,
+              available: isAvailable,
+              outdated: isOutdated,
+              exception: isException
           });
+          
         }
 
         this.timeSlots.push({
@@ -138,6 +173,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
         });
       }
     }
+    this.updateTimeslotStatus();
   }
 
   private getMonday(date: Date): Date {
@@ -160,10 +196,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     return monday;
   }
 
-  getAppointmentCount(dayIndex: number): number {
-    // In future, this could fetch the actual count from a service
-    return 0;
-  }
 
 
   isCurrentDay(dayIndex: number): boolean {
@@ -187,10 +219,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
 
 
   
-  onCellClick(daySlot: DaySlot): void {
-    console.log(`Clicked: Day ${daySlot.day}, Time ${daySlot.time}, Date ${daySlot.date}`);
-    // Handle cell click event later
-  }
+
 
   isDateInException(date: Date): boolean {
     // Convert the input date to the start of the day for comparison
@@ -249,5 +278,157 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       }
     }
     return false;
+  }
+
+  private async loadAppointments(): Promise<void> {
+    const monday = this.getMonday(this.currentDate);
+    const appointments: Appointment[] = [];
+    
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(monday);
+      currentDate.setDate(monday.getDate() + i);
+      const dayAppointments = await this.dbFacade.getAppointmentsForDay(this.doctorId, currentDate);
+      appointments.push(...dayAppointments);
+    }
+    console.log('Appointments:', appointments.length);
+    this.appointments = appointments;
+  }
+
+  private updateTimeslotStatus(): void {
+    const now = new Date();
+    
+    this.appointments.forEach(appointment => {
+      const appointmentDate = appointment.dateTime.toDate();
+      const timeString = appointmentDate.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+      const dayIndex = (appointmentDate.getDay() + 6) % 7; // Convert to Monday-based index
+      
+      const timeSlot = this.timeSlots.find(slot => slot.time === timeString);
+      if (timeSlot) {
+        const daySlot = timeSlot.daySlots[dayIndex];
+        daySlot.appointment = appointment;
+        // if (daySlot.type === 'exception') {
+          
+        //}
+        if (appointment.status === 'cancelled' || this.isDateInException(appointmentDate)) {
+          appointment.status = 'cancelled';
+          this.dbFacade.updateAppointmentStatus(appointment.id!, 'cancelled');
+        } else if (appointmentDate < now && appointment.status === 'scheduled') {
+          this.dbFacade.updateAppointmentStatus(appointment.id!, 'completed');
+          appointment.status = 'completed';
+        }
+      }
+    });
+  }
+  
+  async onCellClick(daySlot: DaySlot): Promise<void> {
+    console.log('Is availible ', daySlot.available);
+    if (daySlot.appointment?.status === 'scheduled') {
+      console.log('Is appointemnt');
+      if (confirm('Do you want to cancel this appointment?')) {
+        await this.dbFacade.removeAppointment(daySlot.appointment.id!);
+        daySlot.appointment = undefined;
+        //await this.loadAppointments();
+        await this.generateTimeSlots();
+      }
+      return;
+    }
+  
+    if (!daySlot.available || this.isDateInException(this.getDayDateForException(daySlot.day))) {
+      return;
+    }
+  
+    const slotDate = this.getDayDateForException(daySlot.day);
+    if (slotDate < new Date()) {
+      return; // Past dates are not clickable
+    }
+  
+    this.currentSlot = daySlot;
+    this.showAppointmentForm = true;
+  }
+  
+  async submitAppointment(): Promise<void> {
+    if (this.appointmentForm.valid && this.currentSlot) {
+      console.log('Submit appointment');
+      const slotDate = this.getDayDateForException(this.currentSlot.day);
+      const [hours, minutes] = this.currentSlot.time.split(':').map(Number);
+      slotDate.setHours(hours, minutes, 0, 0);
+  
+      const appointmentData  = {
+        doctorId: this.doctorId,
+        patientId: 'default-user-id',
+        dateTime: Timestamp.fromDate(slotDate),
+        timeRange: {
+          start: this.currentSlot.time,
+          end: this.addMinutesToTime(this.currentSlot.time, 30)
+        },
+        duration: 30,
+        type: this.appointmentForm.value.type! as AppointmentType,
+        notes: this.appointmentForm.value.notes ?? ""
+      };
+  
+      await this.dbFacade.addAppointment(appointmentData);
+      this.showAppointmentForm = false;
+      this.appointmentForm.reset();
+      this.currentSlot.available = false;
+      this.currentSlot = null;
+      await this.generateTimeSlots();
+    }
+  }
+  
+  private addMinutesToTime(time: string, minutes: number): string {
+    const [hours, mins] = time.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, mins + minutes);
+    return date.toLocaleTimeString('en-US', { hour12: false }).slice(0, 5);
+  }
+  
+  getAppointmentCount(dayIndex: number): number {
+    const date = this.getDayDateForException(dayIndex);
+    return this.appointments.filter(appointment => {
+      const appointmentDate = appointment.dateTime.toDate();
+      return appointmentDate.getDate() === date.getDate() &&
+             appointmentDate.getMonth() === date.getMonth() &&
+             appointmentDate.getFullYear() === date.getFullYear() &&
+             appointment.status === 'scheduled';
+    }).length;
+  }
+
+  isDateTimeInAppointment(date: Date, time: string): boolean {
+    if (!this.appointments.length) return false;
+  
+    const dateTime = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    dateTime.setHours(hours, minutes, 0, 0);
+    
+    return this.appointments.some(appointment => {
+      const appointmentDate = appointment.dateTime.toDate();
+      return dateTime.getTime() === appointmentDate.getTime();
+    });
+  }
+
+
+  private getAppointmentByDateTime(date: Date, time: string): Appointment | undefined {
+    if (!this.appointments.length) return undefined;
+  
+    const dateTime = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    dateTime.setHours(hours, minutes, 0, 0);
+  
+    return this.appointments.find(appointment => {
+      const appointmentDate = appointment.dateTime.toDate();
+      return dateTime.getTime() === appointmentDate.getTime();
+    });
+
+    
+  }
+
+  
+
+  private isDateTimeInPast(date: Date, time: string): boolean {
+    const dateTime = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    dateTime.setHours(hours, minutes, 0, 0);
+
+    return dateTime < new Date();
   }
 }

@@ -1,2 +1,127 @@
 <app-navbar></app-navbar>
-<p>shopping-basket works!</p>
+<div class="container mt-4">
+    <h2>Your Reserved Appointments</h2>
+    
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center my-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+
+    <!-- Appointments List -->
+    <div *ngIf="!loading && appointments.length > 0" class="mb-4">
+      <div class="card mb-3" *ngFor="let appointment of appointments">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title">{{ appointment.type | titlecase }} Appointment</h5>
+              <p class="card-text">
+                Date: {{ appointment.dateTime.toDate() | date:'medium' }}<br>
+                Duration: {{ appointment.duration }} minutes<br>
+                Cost: €50.00
+              </p>
+            </div>
+            <button class="btn btn-danger btn-lg align-self-center" 
+                    (click)="deleteAppointment(appointment)"
+                    [disabled]="isDeletingAppointment(appointment.id!)">
+              <span *ngIf="isDeletingAppointment(appointment.id!)" class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Total Cost</h5>
+          <p class="card-text">€{{ getTotalCost() }}.00</p>
+        </div>
+      </div>
+
+      <button *ngIf="!showPaymentForm" 
+              (click)="showPaymentForm = true" 
+              class="btn btn-primary"
+              [disabled]="appointments.length === 0">
+        Proceed with Payment
+      </button>
+    </div>
+
+    <!-- No Appointments State -->
+    <div *ngIf="!loading && appointments.length === 0" class="alert alert-info">
+      No appointments in your basket.
+    </div>
+
+    <!-- Payment Form -->
+    <div *ngIf="showPaymentForm" class="payment-form mt-4">
+      <h3>Payment Details</h3>
+      <form [formGroup]="paymentForm" (ngSubmit)="processPayment()">
+        <div class="mb-3">
+          <label class="form-label">Payment Method</label>
+          <select formControlName="paymentMethod" class="form-select">
+            <option value="">Select payment method</option>
+            <option value="card">Credit/Debit Card</option>
+            <option value="paypal">PayPal</option>
+            <option value="bank">Bank Transfer</option>
+          </select>
+        </div>
+
+        <!-- Card Payment Fields -->
+        <div *ngIf="paymentForm.get('paymentMethod')?.value === 'card'">
+          <div class="mb-3">
+            <label class="form-label">Card Number</label>
+            <input type="text" formControlName="cardNumber" class="form-control" placeholder="1234 5678 9012 3456">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Expiry Date</label>
+              <input type="text" formControlName="expiryDate" class="form-control" placeholder="MM/YY">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">CVV</label>
+              <input type="text" formControlName="cvv" class="form-control" placeholder="123">
+            </div>
+          </div>
+        </div>
+
+        <!-- PayPal Fields -->
+        <div *ngIf="paymentForm.get('paymentMethod')?.value === 'paypal'">
+          <div class="mb-3">
+            <label class="form-label">PayPal Email</label>
+            <input type="email" formControlName="paypalEmail" class="form-control" placeholder="email@example.com">
+          </div>
+        </div>
+
+        <!-- Bank Transfer Fields -->
+        <div *ngIf="paymentForm.get('paymentMethod')?.value === 'bank'">
+          <div class="mb-3">
+            <label class="form-label">Account Holder Name</label>
+            <input type="text" formControlName="accountName" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">IBAN</label>
+            <input type="text" formControlName="iban" class="form-control">
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" 
+                  [disabled]="!paymentForm.valid" 
+                  class="btn btn-success">
+            Pay €{{ getTotalCost() }}.00
+          </button>
+          <button type="button" 
+                  (click)="showPaymentForm = false" 
+                  class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <app-footer></app-footer>

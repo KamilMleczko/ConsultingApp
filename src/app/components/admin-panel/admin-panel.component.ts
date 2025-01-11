@@ -105,24 +105,6 @@ export class AdminPanelComponent {
     }
   }
 
-  async addSchedulePeriod(): Promise<void> {
-    try {
-      const periodData = {
-        startDate: new Date('2025-04-08'),
-        endDate: new Date('2025-05-10'),
-        weeklyAvailability: {
-          monday: { start: '12:00', end: '16:00' },
-          thursday: { start: '09:00', end: '17:00' },
-          friday: { start: '14:00', end: '18:00' }
-        }
-      };
-      
-      await this.dbFacade.addSchedulePeriod(this.sampleScheduleId, periodData);
-      this.showSuccess('Schedule period added successfully');
-    } catch (error) {
-      this.showError('Error adding schedule period');
-    }
-  }
 
   
 
