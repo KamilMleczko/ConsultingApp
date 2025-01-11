@@ -4,6 +4,8 @@ import { Timestamp } from '@angular/fire/firestore';
 export interface User {
     email: string;
     displayName: string;
+    RealName: string;
+    RealSurname: string;
     role: 'patient' | 'doctor';
     specialization?: string;
     phoneNumber?: string;
@@ -53,9 +55,10 @@ export interface User {
 export interface Appointment {
     doctorId: string;
     patientId: string;
-    dateTime: Timestamp;
+    dateTime: Timestamp; //np. 2022-12-31T12:00:00.000Z
+    timeRange: TimeRange; //np. {start: '12:00', end: '13:00'}
     duration: number;
-    status: 'scheduled' | 'completed' | 'cancelled';
+    status: AppointmentStatus
     type: string;
     notes?: string;
 }

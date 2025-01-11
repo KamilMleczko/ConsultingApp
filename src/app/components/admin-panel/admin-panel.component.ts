@@ -41,6 +41,8 @@ export class AdminPanelComponent {
       const doctorData: Omit<User, 'createdAt'> = {
         email: 'newdoctor@example.com',
         displayName: 'Dr. New Doctor',
+        RealName: 'Jane',
+        RealSurname: 'Smith',
         role: 'doctor',
         specialization: 'General Practice',
         age: 45,
@@ -59,6 +61,8 @@ export class AdminPanelComponent {
       const patientData: Omit<User, 'createdAt'> = {
         email: 'newpatient@example.com',
         displayName: 'New Patient',
+        RealName: 'John',
+        RealSurname: 'Doe',
         role: 'patient',
         phoneNumber: '123-456-789',
         age: 28,
