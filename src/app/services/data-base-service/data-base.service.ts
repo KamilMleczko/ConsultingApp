@@ -3,12 +3,12 @@ import { TimeRange } from './../../interfaces/firestoreTypes';
 
 import { Injectable, inject } from '@angular/core';
 import { Firestore, Timestamp, collection, 
-        addDoc, doc, setDoc, 
+        addDoc, doc, setDoc, getDoc ,
         deleteDoc, query, where, 
         getDocs,updateDoc, arrayUnion , arrayRemove} from '@angular/fire/firestore';
 import { DoctorSchedule, User, Appointment, WeeklySchedule, 
   SchedulePeriod,DoctorScheduleWithoutId, Exception, 
-  AppointmentStatus, AppointmentWithoutId} from '../../interfaces/firestoreTypes';
+  AppointmentStatus, AppointmentWithoutId,UserWithId} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -17,7 +17,7 @@ import { DoctorSchedule, User, Appointment, WeeklySchedule,
 export class DataBaseService {
 
   firestore: Firestore = inject(Firestore);
-
+  //TODO: WYJEBAC
   async addUser(userData: Omit<User, 'createdAt'>): Promise<string> {
     try {
       const userWithTimestamp: User = {
@@ -37,7 +37,37 @@ export class DataBaseService {
     }
   }
 
+
+  async addUserWithId(userId: string, userData: Omit<User, 'createdAt'>): Promise<void> {
+    try {
+      const userWithTimestamp: User = {
+        ...userData,
+        createdAt: Timestamp.now()
+      };
+      
+      await setDoc(
+        doc(this.firestore, 'users', userId),
+        userWithTimestamp
+      );
+    } catch (error) {
+      console.error('Error adding user:', error);
+      throw new Error('Failed to add user');
+    }
+  }
   
+  async getUserById(userId: string): Promise<User | null> {
+    try {
+      const userDoc = await getDoc(doc(this.firestore, 'users', userId));
+      if (userDoc.exists()) {
+        return userDoc.data() as User;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      throw new Error('Failed to fetch user');
+    }
+  }
+
   async removeUser(userId: string): Promise<void> {
     try {
       // First, check if user exists
@@ -129,21 +159,21 @@ export class DataBaseService {
 
   async deleteAllData() {
    
-      // Delete all users
+      //delete all users
       const usersCollection = collection(this.firestore, 'users');
       const usersSnapshot = await getDocs(usersCollection);
       usersSnapshot.forEach(async (userDoc) => {
         await deleteDoc(doc(usersCollection, userDoc.id));
       });
 
-      // Delete all doctor schedules
+      //delete all doctor schedules
       const doctorSchedulesCollection = collection(this.firestore, 'doctorSchedules');
       const doctorSchedulesSnapshot = await getDocs(doctorSchedulesCollection);
       doctorSchedulesSnapshot.forEach(async (scheduleDoc) => {
         await deleteDoc(doc(doctorSchedulesCollection, scheduleDoc.id));
       });
 
-      // Delete all appointments
+      //delete all appointments
       const appointmentsCollection = collection(this.firestore, 'appointments');
       const appointmentsSnapshot = await getDocs(appointmentsCollection);
       appointmentsSnapshot.forEach(async (appointmentDoc) => {
@@ -323,6 +353,19 @@ export class DataBaseService {
     } catch (error) {
       console.error('Error fetching patient appointments:', error);
       throw new Error('Failed to fetch patient appointments');
+    }
+  }
+
+  async getAllUsers(): Promise<UserWithId[]> {
+    try {
+      const usersSnapshot = await getDocs(collection(this.firestore, 'users'));
+      return usersSnapshot.docs.map(doc => ({
+        ...(doc.data() as User),
+        id: doc.id  
+      }));
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw new Error('Failed to fetch users');
     }
   }
 }

@@ -6,7 +6,21 @@ export interface User {
     displayName: string;
     RealName: string;
     RealSurname: string;
-    role: 'patient' | 'doctor';
+    role: 'patient' | 'doctor' | 'admin';
+    specialization?: string;
+    phoneNumber?: string;
+    createdAt: Timestamp;
+    age: number;
+    sex: Sex;
+  }
+
+  export interface UserWithId {
+    id : string;
+    email: string;
+    displayName: string;
+    RealName: string;
+    RealSurname: string;
+    role: 'patient' | 'doctor' | 'admin';
     specialization?: string;
     phoneNumber?: string;
     createdAt: Timestamp;

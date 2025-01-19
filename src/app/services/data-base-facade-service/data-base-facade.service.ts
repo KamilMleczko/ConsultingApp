@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataBaseService } from '../data-base-service/data-base.service';
-import { User, Appointment, WeeklySchedule , DoctorSchedule, Exception, AppointmentStatus, AppointmentWithoutId} from '../../interfaces/firestoreTypes';
+import { User, Appointment, WeeklySchedule , DoctorSchedule, Exception, 
+  AppointmentStatus, AppointmentWithoutId, UserWithId} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -15,7 +16,7 @@ export class DataBaseFacadeService {
   error$ = this._error.asObservable();
   private dbService: DataBaseService = inject(DataBaseService);
 
-
+//TODO: WYJEBAC 
   async addUser(userData: Omit<User, 'createdAt'>): Promise<string> {
     this._loading.next(true);
     this._error.next(null);
@@ -31,6 +32,33 @@ export class DataBaseFacadeService {
     }
   }
 
+  async addUserWithId(userId: string, userData: Omit<User, 'createdAt'>): Promise<void> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      await this.dbService.addUserWithId(userId, userData);
+    } catch (error) {
+      this._error.next('Failed to add user');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+
+  async getUserById(userId: string): Promise<User | null> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getUserById(userId);
+    } catch (error) {
+      this._error.next('Failed to fetch user');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
   async removeUser(userId: string): Promise<void> {
     this._loading.next(true);
     this._error.next(null);
@@ -45,7 +73,6 @@ export class DataBaseFacadeService {
     }
   }
 
-  // Doctor Schedule Operations
   async addDoctorSchedule(
     doctorId: string,
     scheduleData: {
@@ -246,6 +273,20 @@ export class DataBaseFacadeService {
       return await this.dbService.getAppointmentsByPatientId(patientId);
     } catch (error) {
       this._error.next('Failed to fetch patient appointments');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
+
+  async getAllUsers(): Promise<UserWithId[]> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getAllUsers();
+    } catch (error) {
+      this._error.next('Failed to fetch users');
       throw error;
     } finally {
       this._loading.next(false);

@@ -2,19 +2,16 @@
 <div class="container mt-4">
     <h2>Your Reserved Appointments</h2>
     
-    <!-- Loading State -->
     <div *ngIf="loading" class="text-center my-4">
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
-    <!-- Error State -->
     <div *ngIf="error" class="alert alert-danger" role="alert">
       {{ error }}
     </div>
 
-    <!-- Appointments List -->
     <div *ngIf="!loading && appointments.length > 0" class="mb-4">
       <div class="card mb-3" *ngFor="let appointment of appointments">
         <div class="card-body">
@@ -52,12 +49,10 @@
       </button>
     </div>
 
-    <!-- No Appointments State -->
     <div *ngIf="!loading && appointments.length === 0" class="alert alert-info">
       No appointments in your basket.
     </div>
 
-    <!-- Payment Form -->
     <div *ngIf="showPaymentForm" class="payment-form mt-4">
       <h3>Payment Details</h3>
       <form [formGroup]="paymentForm" (ngSubmit)="processPayment()">
@@ -71,7 +66,6 @@
           </select>
         </div>
 
-        <!-- Card Payment Fields -->
         <div *ngIf="paymentForm.get('paymentMethod')?.value === 'card'">
           <div class="mb-3">
             <label class="form-label">Card Number</label>
@@ -89,7 +83,6 @@
           </div>
         </div>
 
-        <!-- PayPal Fields -->
         <div *ngIf="paymentForm.get('paymentMethod')?.value === 'paypal'">
           <div class="mb-3">
             <label class="form-label">PayPal Email</label>
@@ -97,7 +90,6 @@
           </div>
         </div>
 
-        <!-- Bank Transfer Fields -->
         <div *ngIf="paymentForm.get('paymentMethod')?.value === 'bank'">
           <div class="mb-3">
             <label class="form-label">Account Holder Name</label>

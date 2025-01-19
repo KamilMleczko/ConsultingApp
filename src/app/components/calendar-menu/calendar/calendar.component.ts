@@ -69,7 +69,7 @@ export class CalendarComponent implements OnInit{
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() + 1
     );
-    this.selectedDay = null; //for clicked day coloring
+    this.selectedDay = null; 
     this.generateCalendar();
   }
 
@@ -78,7 +78,7 @@ export class CalendarComponent implements OnInit{
       this.currentDate.getFullYear(),
       this.currentDate.getMonth() - 1
     );
-    this.selectedDay = null; //for clicked day coloring
+    this.selectedDay = null; 
     this.generateCalendar();
   }
 

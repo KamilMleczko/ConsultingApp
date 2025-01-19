@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { inject ,OnInit} from '@angular/core';
 import { FooterComponent } from '../home-page/footer/footer.component';
+import { AuthService } from '../../services/auth-service/auth.service';
 
 @Component({
   selector: 'app-shopping-basket',
@@ -18,7 +19,7 @@ import { FooterComponent } from '../home-page/footer/footer.component';
 export class ShoppingBasketComponent  implements OnInit{
   private dbFacade = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
-
+  private authService = inject(AuthService);
   appointments: Appointment[] = [];
   loading = false;
   error: string | null = null;
@@ -48,13 +49,13 @@ export class ShoppingBasketComponent  implements OnInit{
       const accountName = this.paymentForm.get('accountName');
       const iban = this.paymentForm.get('iban');
 
-      // Reset all validators
+      //reset validators
       [cardNumber, expiryDate, cvv, paypalEmail, accountName, iban].forEach(control => {
         control?.clearValidators();
         control?.updateValueAndValidity();
       });
 
-      // Set validators based on payment method
+
       if (method === 'card') {
         cardNumber?.setValidators([Validators.required, Validators.pattern(/^\d{16}$|^\d{4} \d{4} \d{4} \d{4}$/)]);
         expiryDate?.setValidators([Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]);
@@ -71,11 +72,14 @@ export class ShoppingBasketComponent  implements OnInit{
   }
 
   async loadAppointments() {
+    if (!this.authService.firebaseAuth.currentUser) {
+      return ;
+    }
     this.loading = true;
     this.error = null;
 
     try {
-      this.appointments = await this.dbFacade.getAppointmentsByPatientId('default-user-id');
+      this.appointments = await this.dbFacade.getAppointmentsByPatientId(this.authService.firebaseAuth.currentUser?.uid);//'default-user-id'
       this.appointments.sort((a, b) => a.dateTime.toDate().getTime() - b.dateTime.toDate().getTime());
     } catch (error) {
       this.error = 'Failed to load appointments';
@@ -91,7 +95,7 @@ export class ShoppingBasketComponent  implements OnInit{
 
   processPayment() {
     if (this.paymentForm.valid) {
-      // Mock payment processing
+      //mock payment process
       console.log('Processing payment:', {
         method: this.paymentForm.value.paymentMethod,
         amount: this.getTotalCost(),

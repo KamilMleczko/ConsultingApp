@@ -9,7 +9,7 @@ import { Firestore, collection, query, where, getDocs, Timestamp } from '@angula
 import { DataBaseFacadeService } from '../../../services/data-base-facade-service/data-base-facade.service';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { AuthService } from '../../../services/auth-service/auth.service';
 
 
 interface TimeSlot {
@@ -46,6 +46,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   receivedDate = input<Date>();
 
   private firestore: Firestore = inject(Firestore);
+  private authService  = inject(AuthService)
   schedules: DoctorSchedule[] = [];
   private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
@@ -222,13 +223,10 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
 
 
   isDateInException(date: Date): boolean {
-    // Convert the input date to the start of the day for comparison
     const targetDate = new Date(date);
     targetDate.setHours(1, 0, 0, 0);
-    //const targetDate =date
-    // Check each schedule's exceptions
     for (const schedule of this.schedules) {
-      // First check if the date falls within this schedule's period
+      //first check if the date falls within this schedule's period
       const isInSchedulePeriod = schedule.schedulePeriods.some(period => {
         const periodStart = period.startDate.toDate();
         const periodEnd = period.endDate.toDate();
@@ -236,7 +234,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       });
 
       if (isInSchedulePeriod) {
-        // Then check if the date falls within any exception period
+        //then check if the date falls within any exception period
         const isInException = schedule.exceptions.some(exception => {
           const exceptionStart = exception.startDate.toDate();
           const exceptionEnd = exception.endDate.toDate();
@@ -264,13 +262,13 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
         const periodStart = period.startDate.toDate();
         const periodEnd = period.endDate.toDate();
 
-        // Check if the date falls within the schedule period
+        //check if the date falls within the schedule period
         if (dateTime >= periodStart && dateTime <= periodEnd) {
           const dayName = this.weekDays[dateTime.getDay() === 0 ? 6 : dateTime.getDay() - 1]
             .toLowerCase() as keyof WeeklySchedule;
           const daySchedule = period.weeklyAvailability[dayName];
 
-          // Check if the time falls within the day's schedule
+          //check if the time falls within the day's schedule
           if (daySchedule) {
             return this.isTimeInRange(time, daySchedule);
           }
@@ -306,9 +304,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       if (timeSlot) {
         const daySlot = timeSlot.daySlots[dayIndex];
         daySlot.appointment = appointment;
-        // if (daySlot.type === 'exception') {
-          
-        //}
         if (appointment.status === 'cancelled' || this.isDateInException(appointmentDate)) {
           appointment.status = 'cancelled';
           this.dbFacade.updateAppointmentStatus(appointment.id!, 'cancelled');
@@ -321,13 +316,14 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   }
   
   async onCellClick(daySlot: DaySlot): Promise<void> {
+    if (this.authService.currentUserSig()?.role === 'doctor') return; //only patients can make appointments
+
     console.log('Is availible ', daySlot.available);
-    if (daySlot.appointment?.status === 'scheduled') {
+    if (daySlot.appointment?.status === 'scheduled' ) {
       console.log('Is appointemnt');
       if (confirm('Do you want to cancel this appointment?')) {
         await this.dbFacade.removeAppointment(daySlot.appointment.id!);
         daySlot.appointment = undefined;
-        //await this.loadAppointments();
         await this.generateTimeSlots();
       }
       return;
@@ -339,7 +335,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   
     const slotDate = this.getDayDateForException(daySlot.day);
     if (slotDate < new Date()) {
-      return; // Past dates are not clickable
+      return; //past dates are not clickable
     }
   
     this.currentSlot = daySlot;
@@ -347,7 +343,10 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   }
   
   async submitAppointment(): Promise<void> {
-    if (this.appointmentForm.valid && this.currentSlot) {
+    if (this.appointmentForm.valid &&
+       this.currentSlot && 
+       this.authService.firebaseAuth.currentUser &&
+       this.authService.currentUserSig()?.role !== 'doctor') {
       console.log('Submit appointment');
       const slotDate = this.getDayDateForException(this.currentSlot.day);
       const [hours, minutes] = this.currentSlot.time.split(':').map(Number);
@@ -355,7 +354,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   
       const appointmentData  = {
         doctorId: this.doctorId,
-        patientId: 'default-user-id',
+        patientId: this.authService.firebaseAuth.currentUser?.uid ,
         dateTime: Timestamp.fromDate(slotDate),
         timeRange: {
           start: this.currentSlot.time,

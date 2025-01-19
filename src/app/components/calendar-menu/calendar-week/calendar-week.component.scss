@@ -127,30 +127,30 @@ td {
 
   }
   &.scheduled {
-    background-color: #006400; /* Dark green */
+    background-color: #006400;
     color: white;
     &.follow-up {
-      background-color: #FFD700 !important; /* Gold */ 
+      background-color: #FFD700 !important;
     }
     &.first {
-      background-color: #192fba !important; /* Gold */ 
+      background-color: #192fba !important; 
     }
     &.control {
-      background-color: #b915a6 !important; /* Gold */ 
+      background-color: #b915a6 !important; 
     }
   }
 
   &.completed {
-    background-color: #98FB98; /* Gray/green */
+    background-color: #96b296; 
   }
 
   &.cancelled {
-    background-color: #8B0000; /* Dark red */
+    background-color: #8B0000;
     color: white;
   }
 
   &.outdated {
-    background-color: #D3D3D3; /* Light gray */
+    background-color: #D3D3D3; 
   }
   
 }

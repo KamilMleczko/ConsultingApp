@@ -1,0 +1,40 @@
+form {
+    max-width: 400px; // Limit form width
+    margin: 0 auto; // Center align the form
+    background-color: #f8f9fa; // Light gray background
+    border: 1px solid #dee2e6; // Border for definition
+    border-radius: 8px; // Rounded corners
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow
+  
+    h2 {
+      color: #343a40; // Dark heading color
+    }
+  
+    .form-group {
+      label {
+        font-weight: 500; // Semi-bold labels
+      }
+  
+      input {
+        border-radius: 6px; // Round input corners
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); // Blue focus shadow
+        }
+      }
+    }
+  
+    .btn {
+      transition: all 0.2s ease;
+      &:hover {
+        background-color: #0056b3; // Darker hover state for button
+        border-color: #004085;
+      }
+    }
+  }
+  
+
+.ctn{
+    margin-top: 96px;
+    padding-top: 100px ;
+}
