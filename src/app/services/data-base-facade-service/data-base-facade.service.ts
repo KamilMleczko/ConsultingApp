@@ -292,4 +292,18 @@ export class DataBaseFacadeService {
       this._loading.next(false);
     }
   }
+
+  async getDoctors(): Promise<UserWithId[]> {
+    this._loading.next(true);
+    this._error.next(null);
+    
+    try {
+      return await this.dbService.getDoctors();
+    } catch (error) {
+      this._error.next('Failed to fetch doctors');
+      throw error;
+    } finally {
+      this._loading.next(false);
+    }
+  }
 }

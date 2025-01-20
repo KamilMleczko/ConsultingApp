@@ -47,16 +47,14 @@ export class RegisterComponent {
         displayName: formData.displayName,
         RealName: formData.RealName,
         RealSurname: formData.RealSurname,
-        role: formData.role as 'patient' | 'doctor',
+        role: formData.role as 'patient',
         phoneNumber: formData.phoneNumber || '',
         age: formData.age,
         sex: formData.sex as Sex,
       };
 
-      // Add specialization only for doctors
-      const userData: Omit<User, 'createdAt'> = formData.role === 'doctor' 
-        ? { ...baseUserData, specialization: formData.specialization }
-        : baseUserData;
+      const userData: Omit<User, 'createdAt'> = 
+        baseUserData;
 
       this.authService.register(
         formData.email,

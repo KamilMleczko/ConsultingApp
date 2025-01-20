@@ -4,8 +4,9 @@ import { DataBaseFacadeService } from '../../../services/data-base-facade-servic
 import { Injectable, inject } from '@angular/core';
 import { WeeklySchedule , DoctorSchedule, } from '../../../interfaces/firestoreTypes';
 import { CommonModule } from '@angular/common'; 
-import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs, doc } from '@angular/fire/firestore';
 import { Timestamp } from '@angular/fire/firestore';
+import { AuthService } from '../../../services/auth-service/auth.service';
 @Component({
   selector: 'app-optional-buttons',
   standalone: true,
@@ -25,7 +26,7 @@ export class OptionalButtonsComponent {
   error$ = this.dbFacade.error$;
   showForm = false;
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  doctorId = 'sample-doctor-id'; // Hardcoded for now
+  private authService  = inject(AuthService)
   showExceptionForm = false;
   currentScheduleId: string | null = null;
 
@@ -62,10 +63,10 @@ export class OptionalButtonsComponent {
     this.showForm = !this.showForm;
   }
 
-  private async checkScheduleOverlap(startDate: Date, endDate: Date): Promise<boolean> {
+  private async checkScheduleOverlap(startDate: Date, endDate: Date, doctorId: string): Promise<boolean> {
     try {
       const schedulesRef = collection(this.firestore, 'doctorSchedules');
-      const q = query(schedulesRef, where('doctorId', '==', this.doctorId));
+      const q = query(schedulesRef, where('doctorId', '==', doctorId ));
       const querySnapshot = await getDocs(q);
       
       for (const doc of querySnapshot.docs) {
@@ -95,7 +96,7 @@ export class OptionalButtonsComponent {
   }
 
   async submitSchedule() {
-    if (this.scheduleForm.valid) {
+    if (this.scheduleForm.valid && this.authService.firebaseAuth.currentUser) {
       const formValue = this.scheduleForm.value;
       const startDate = new Date(formValue.startDate!);
       const endDate = new Date(formValue.endDate!);
@@ -106,7 +107,7 @@ export class OptionalButtonsComponent {
           return;
         }
 
-        const hasOverlap = await this.checkScheduleOverlap(startDate, endDate);
+        const hasOverlap = await this.checkScheduleOverlap(startDate, endDate,  this.authService.firebaseAuth.currentUser.uid);
         if (hasOverlap) {
           alert('This schedule overlaps with an existing schedule. Please choose different dates.');
           return;
@@ -123,7 +124,7 @@ export class OptionalButtonsComponent {
           }
         });
 
-        await this.dbFacade.addDoctorSchedule(this.doctorId, {
+        await this.dbFacade.addDoctorSchedule(this.authService.firebaseAuth.currentUser.uid, {
           startDate: startDate,
           endDate: endDate,
           weeklyAvailability
@@ -131,7 +132,7 @@ export class OptionalButtonsComponent {
         
         this.scheduleForm.reset();
         this.showForm = false;
-        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         alert('Schedule added successfully');
       } catch (error) {
         if (error instanceof Error) {
@@ -146,14 +147,17 @@ export class OptionalButtonsComponent {
 
 
   async toggleSchedules() {
-    this.showSchedules = !this.showSchedules;
-      console.log('Fetching schedules...');
-      try {
-        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
-      } catch (error) {
-        console.error('Error fetching schedules:', error);
-      }
+    if (this.authService.firebaseAuth.currentUser){
+      this.showSchedules = !this.showSchedules;
+        console.log('Fetching schedules...');
+        try {
+          this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
+        } catch (error) {
+          console.error('Error fetching schedules:', error);
+        }
+    }
   }
+
   hideSchedules() {
     this.showSchedules = false;
   }
@@ -170,19 +174,19 @@ export class OptionalButtonsComponent {
   }
   
   async submitSingleDay() {
-    if (this.singleDayForm.valid) {
+    if (this.singleDayForm.valid && this.authService.firebaseAuth.currentUser) {
       const formValue = this.singleDayForm.value;
       const date = new Date(formValue.date!);
 
       
-      const hasOverlap = await this.checkScheduleOverlap(date, date);
+      const hasOverlap = await this.checkScheduleOverlap(date, date, this.authService.firebaseAuth.currentUser.uid);
       if (hasOverlap) {
         alert('This schedule overlaps with an existing schedule. Please choose different dates.');
         return;
       }
   
       try {
-        await this.dbFacade.addSingleDaySchedule(this.doctorId, date, {
+        await this.dbFacade.addSingleDaySchedule(this.authService.firebaseAuth.currentUser.uid, date, {
           start: formValue.start!,
           end: formValue.end!
         });
@@ -197,10 +201,10 @@ export class OptionalButtonsComponent {
   }
 
   async deleteSchedule(scheduleId : string) {
-    if (confirm('Are you sure you want to delete this schedule?')) {
+    if (confirm('Are you sure you want to delete this schedule?') && this.authService.firebaseAuth.currentUser) {
       try {
         await this.dbFacade.removeDoctorScheduleById(scheduleId);
-        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
       } catch (error) {
         console.error('Error deleting schedule:', error);
       }
@@ -230,7 +234,7 @@ export class OptionalButtonsComponent {
   }
   
   async submitException() {
-    if (this.exceptionForm.valid && this.currentScheduleId) {
+    if (this.exceptionForm.valid && this.currentScheduleId && this.authService.firebaseAuth.currentUser) {
       const formValue = this.exceptionForm.value;
       const startDate = new Date(formValue.startDate!);
       const endDate = new Date(formValue.endDate!);
@@ -277,7 +281,7 @@ export class OptionalButtonsComponent {
         this.exceptionForm.reset();
         this.showExceptionForm = false;
         this.currentScheduleId = null;
-        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         
         alert('Exception added successfully');
       } catch (error) {
@@ -297,11 +301,11 @@ export class OptionalButtonsComponent {
 
   async toggleExceptionsList() {
     this.showExceptionsList = !this.showExceptionsList;
-    if (this.showExceptionsList) {
+    if (this.showExceptionsList && this.authService.firebaseAuth.currentUser) {
       try {
         //fetch schedules if not already loaded
         if (this.schedules.length === 0) {
-          this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+          this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         }
         
         //transform schedules data to get exceptions
@@ -338,7 +342,7 @@ export class OptionalButtonsComponent {
 
 
   async deleteException(scheduleId: string, exception: { startDate: Date, endDate: Date }) {
-    if (confirm('Are you sure you want to delete this exception?')) {
+    if (confirm('Are you sure you want to delete this exception?') && this.authService.firebaseAuth.currentUser) {
       try {
         await this.dbFacade.removeExceptionFromSchedule(scheduleId, {
           startDate: Timestamp.fromDate(exception.startDate),
@@ -346,7 +350,7 @@ export class OptionalButtonsComponent {
         });
         
         //refresh the schedules and exceptions lists
-        this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+        this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         
         //update allExceptions array
         this.allExceptions = this.schedules

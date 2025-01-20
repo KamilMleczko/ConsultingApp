@@ -1,0 +1,15 @@
+<div class="doctor-selector">
+    <div class="dropdown">
+      <button (click)="toggleDropdown()" class="dropdown-button">
+        {{ getSelectedDoctorName() }}
+      </button>
+      
+      <div *ngIf="isDropdownOpen" class="dropdown-content">
+        <div class="dropdown-item" 
+             *ngFor="let doctor of doctors"
+             (click)="selectDoctor(doctor.id)">
+          {{ doctor.RealName }} {{ doctor.RealSurname }} - {{ doctor.specialization }}
+        </div>
+      </div>
+    </div>
+  </div>

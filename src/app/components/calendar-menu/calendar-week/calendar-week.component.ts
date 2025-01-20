@@ -44,14 +44,13 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   currentDate: Date = new Date();
 
   receivedDate = input<Date>();
-
+  receivedDoctorId = input<string>();
   private firestore: Firestore = inject(Firestore);
   private authService  = inject(AuthService)
   schedules: DoctorSchedule[] = [];
   private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
 
-  doctorId: string = 'sample-doctor-id'; // TODO: Replace in authorisation phase with userID
   currentSchedule: WeeklySchedule | null = null;
 
   showAppointmentForm = false;
@@ -63,32 +62,57 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   appointments: Appointment[] = [];
 
   async ngOnInit():  Promise<void>{
-    await this.updateScheduleForCurrentWeek();
-    
-    await this.generateTimeSlots();
+    if ((this.authService.currentUserSig()?.role == "doctor")
+      && this.authService.firebaseAuth.currentUser){ //for generating schedule to view for doctor user
+      await this.updateScheduleForCurrentWeek(this.authService.firebaseAuth.currentUser.uid);
+      await this.generateTimeSlots(this.authService.firebaseAuth.currentUser.uid);
+    }
+    else if (this.receivedDoctorId === undefined){ //when no doctor is selected 
+      await this.updateScheduleForCurrentWeek('');
+      await this.generateTimeSlots('');
+    }
+    else{ //when patient selects doctor
+    await this.updateScheduleForCurrentWeek(this.receivedDoctorId.toString());
+    await this.generateTimeSlots(this.receivedDoctorId.toString());
+    }
   }
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    if (changes['receivedDate'] && !changes['receivedDate'].firstChange) {
+    if (changes['receivedDate'] && !changes['receivedDate'].firstChange ) {
       console.log('Received date changed:', changes['receivedDate'].currentValue);
       this.currentDate = new Date(changes['receivedDate'].currentValue);
-      await this.updateScheduleForCurrentWeek();
-      
-      await this.generateTimeSlots();
+      if (this.receivedDoctorId === undefined || this.receivedDoctorId.toString() === ''){
+        await this.updateScheduleForCurrentWeek('');
+        await this.generateTimeSlots('');
+      }else{
+        await this.updateScheduleForCurrentWeek(this.receivedDoctorId.toString());
+        await this.generateTimeSlots(this.receivedDoctorId.toString());
+      }
+    }
+    else if ( changes['receivedDoctorId'] && !changes['receivedDoctorId'].firstChange){
+      console.log('Received doctorId changed:', changes['receivedDoctorId'].currentValue);
+      await this.updateScheduleForCurrentWeek(changes['receivedDoctorId'].currentValue);
+      await this.generateTimeSlots(changes['receivedDoctorId'].currentValue);
     }
   }
 
 
 
-  private async updateScheduleForCurrentWeek(): Promise<void> {
+  private async updateScheduleForCurrentWeek(doctorId: string): Promise<void> {
     const monday = this.getMonday(this.currentDate);
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-
+    if (doctorId === ''){
+      console.log('No doctorId');
+      this.schedules = [];
+      this.currentSchedule = null;
+      return;
+    } 
     try {
+      console.log(doctorId.toString());
       const schedulesRef = collection(this.firestore, 'doctorSchedules');
-      const q = query(schedulesRef, where('doctorId', '==', this.doctorId));
+      const q = query(schedulesRef, where('doctorId', '==', doctorId));
       const querySnapshot = await getDocs(q);
-      this.schedules = await this.dbFacade.getDoctorSchedules(this.doctorId);
+      this.schedules = await this.dbFacade.getDoctorSchedules(doctorId);
       this.currentSchedule = null;
 
       querySnapshot.forEach((doc) => {
@@ -129,9 +153,9 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     
     return timeMinutes >= startMinutes2 && timeMinutes < endMinutes2;
   }
-   private  async generateTimeSlots(): Promise<void> {
+   private  async generateTimeSlots(doctorId: string): Promise<void> {
     this.timeSlots = [];
-    await this.loadAppointments();
+    await this.loadAppointments(doctorId);
     const monday = this.getMonday(this.currentDate);
 
     for (let hour = 0; hour < 24; hour++) {
@@ -278,14 +302,18 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     return false;
   }
 
-  private async loadAppointments(): Promise<void> {
+  private async loadAppointments(doctorId: string): Promise<void> {
+    if(doctorId == null){
+      this.appointments = [];
+      return;
+    } 
     const monday = this.getMonday(this.currentDate);
     const appointments: Appointment[] = [];
     
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(monday);
       currentDate.setDate(monday.getDate() + i);
-      const dayAppointments = await this.dbFacade.getAppointmentsForDay(this.doctorId, currentDate);
+      const dayAppointments = await this.dbFacade.getAppointmentsForDay(doctorId, currentDate);
       appointments.push(...dayAppointments);
     }
     console.log('Appointments:', appointments.length);
@@ -324,19 +352,26 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       if (confirm('Do you want to cancel this appointment?')) {
         await this.dbFacade.removeAppointment(daySlot.appointment.id!);
         daySlot.appointment = undefined;
-        await this.generateTimeSlots();
+        if (this.receivedDoctorId !== undefined){
+          await this.generateTimeSlots(this.receivedDoctorId.toString());
+        }
+        else{
+          await this.generateTimeSlots('');
+        }
       }
       return;
     }
   
-    if (!daySlot.available || this.isDateInException(this.getDayDateForException(daySlot.day))) {
+    if (!daySlot.available || this.isDateInException(this.getDayDateForException(daySlot.day)) || daySlot.outdated) {
       return;
     }
   
-    const slotDate = this.getDayDateForException(daySlot.day);
-    if (slotDate < new Date()) {
-      return; //past dates are not clickable
-    }
+    // const slotDate = this.getDayDateForException(daySlot.day); //replaced by dayslot.outdated check above
+    // console.log('Slot date: ', slotDate);
+    // if (slotDate < new Date()) {
+    //   return; //past dates are not clickable
+    // }
+    
   
     this.currentSlot = daySlot;
     this.showAppointmentForm = true;
@@ -346,14 +381,16 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     if (this.appointmentForm.valid &&
        this.currentSlot && 
        this.authService.firebaseAuth.currentUser &&
-       this.authService.currentUserSig()?.role !== 'doctor') {
+       this.authService.currentUserSig()?.role !== 'doctor' &&
+       this.receivedDoctorId !== undefined &&
+       this.receivedDoctorId.toString() !== '') {
       console.log('Submit appointment');
       const slotDate = this.getDayDateForException(this.currentSlot.day);
       const [hours, minutes] = this.currentSlot.time.split(':').map(Number);
       slotDate.setHours(hours, minutes, 0, 0);
   
       const appointmentData  = {
-        doctorId: this.doctorId,
+        doctorId: this.receivedDoctorId.toString(),
         patientId: this.authService.firebaseAuth.currentUser?.uid ,
         dateTime: Timestamp.fromDate(slotDate),
         timeRange: {
@@ -370,7 +407,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       this.appointmentForm.reset();
       this.currentSlot.available = false;
       this.currentSlot = null;
-      await this.generateTimeSlots();
+      await this.generateTimeSlots(this.receivedDoctorId.toString());
     }
   }
   

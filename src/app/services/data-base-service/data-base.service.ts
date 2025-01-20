@@ -158,13 +158,6 @@ export class DataBaseService {
   }
 
   async deleteAllData() {
-   
-      //delete all users
-      const usersCollection = collection(this.firestore, 'users');
-      const usersSnapshot = await getDocs(usersCollection);
-      usersSnapshot.forEach(async (userDoc) => {
-        await deleteDoc(doc(usersCollection, userDoc.id));
-      });
 
       //delete all doctor schedules
       const doctorSchedulesCollection = collection(this.firestore, 'doctorSchedules');
@@ -366,6 +359,23 @@ export class DataBaseService {
     } catch (error) {
       console.error('Error fetching users:', error);
       throw new Error('Failed to fetch users');
+    }
+  }
+
+
+  async getDoctors(): Promise<UserWithId[]> {
+    try {
+      const usersRef = collection(this.firestore, 'users');
+      const q = query(usersRef, where('role', '==', 'doctor'));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        ...(doc.data() as User),
+        id: doc.id
+      }));
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      throw new Error('Failed to fetch doctors');
     }
   }
 }

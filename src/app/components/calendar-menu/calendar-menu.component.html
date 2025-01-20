@@ -2,11 +2,14 @@
 <div class="calendar">
     <div class="left-column ">
         <app-calendar (daySelectedEvent)="ReceiveSelectedDay($event)"></app-calendar>
-        @if (authService.currentUserSig()?.role == "doctor" || authService.currentUserSig()?.role == "admin"){
-            <app-optional-buttons></app-optional-buttons>
+        @if (authService.currentUserSig()?.role == "doctor" ){
+            <app-optional-buttons ></app-optional-buttons>
+        }
+        @else if (authService.currentUserSig()?.role == "patient" || authService.currentUserSig()?.role == "admin"){
+            <app-patient-buttons (doctorSelectedEvent)="onDoctorSelected($event)"></app-patient-buttons>
         }
     </div>
     <div class="right-column">
-        <app-calendar-week [receivedDate]="receivedDate"></app-calendar-week>
+        <app-calendar-week [receivedDate]="receivedDate" [receivedDoctorId]="receivedDoctorId"></app-calendar-week>
     </div>  
 </div>

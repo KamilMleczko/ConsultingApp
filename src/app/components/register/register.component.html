@@ -44,16 +44,8 @@
     <label for="role" class="form-label">Role:</label>
     <select id="role" formControlName="role" class="form-control">
       <option value="patient">Patient</option>
-      <option value="doctor">Doctor</option>
     </select>
   </div>
-
-  @if (registerForm.get('role')?.value === 'doctor') {
-    <div class="form-group mb-3">
-      <label for="specialization" class="form-label">Specialization:</label>
-      <input type="text" id="specialization" formControlName="specialization" class="form-control" placeholder="Enter your specialization"/>
-    </div>
-  }
 
   <div class="form-group mb-3">
     <label for="phoneNumber" class="form-label">Phone Number:</label>

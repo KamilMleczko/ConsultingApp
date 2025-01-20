@@ -1,21 +1,25 @@
 <app-navbar></app-navbar>
-<div class="mt-6 d-flex flex-column gap-2">
-  <div class="form-group">
-    <label class="form-label">Authentication Persistence:</label>
-    <select 
-      class="form-select" 
-      [ngModel]="currentPersistence()"
-      (ngModelChange)="changePersistence($event)">
-      @for (option of persistenceOptions; track option) {
-        <option [value]="option">{{option}}</option>
-      }
-    </select>
-  </div>
-</div>
+
 
 <div class ="ctn">
 
+ 
+
   <div class="mt-6 d-flex flex-column gap-2 mt-5 mr-3">
+    <div class="m-2 p-2">
+      <div class="form-group">
+        <label class="form-label">Authentication Persistence:</label>
+        <select 
+          class="form-select" 
+          [ngModel]="currentPersistence()"
+          (ngModelChange)="changePersistence($event)">
+          @for (option of persistenceOptions; track option) {
+            <option [value]="option">{{option}}</option>
+          }
+        </select>
+      </div>
+    </div>
+
     <button 
       class="btn btn-danger m-2 p-2"
       (click)="confirmAndClearDatabase()"
@@ -26,6 +30,8 @@
     <button (click)="toggleForm()" class="btn btn-lg btn-primary  m-3 p-2">
       AddUser
     </button>
+
+    
   </div>
 
 <div class="container mx-auto p-4">

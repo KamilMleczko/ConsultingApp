@@ -72,10 +72,4 @@ export class AuthService {
     }
   
     
-    // async deleteUser(uid: string): Promise<void> {
-    //   if (this.currentUserSig()?.role == "admin") {
-    //     //await deleteUser(this.firebaseAuth, uid);
-    //     this.firebaseAuth.
-    //   }
-    // }
 }
