@@ -8,7 +8,8 @@ import { Firestore, Timestamp, collection,
         getDocs,updateDoc, arrayUnion , arrayRemove} from '@angular/fire/firestore';
 import { DoctorSchedule, User, Appointment, WeeklySchedule, 
   SchedulePeriod,DoctorScheduleWithoutId, Exception, 
-  AppointmentStatus, AppointmentWithoutId,UserWithId} from '../../interfaces/firestoreTypes';
+  AppointmentStatus, AppointmentWithoutId,UserWithId, 
+  DoctorComment, DoctorCommentWithoutId, DoctorRating, DoctorRatingWithoutId} from '../../interfaces/firestoreTypes';
 
 
 @Injectable({
@@ -378,4 +379,176 @@ export class DataBaseService {
       throw new Error('Failed to fetch doctors');
     }
   }
+
+  async addDoctorRating(ratingData: DoctorRatingWithoutId): Promise<string> {
+    try {
+      const docRef = await addDoc(
+        collection(this.firestore, 'doctorRatings'),
+        ratingData
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding doctor rating:', error);
+      throw new Error('Failed to add doctor rating');
+    }
+  }
+  
+  async updateDoctorRating(ratingId: string, isLike: boolean): Promise<void> {
+    try {
+      const ratingRef = doc(this.firestore, 'doctorRatings', ratingId);
+      await updateDoc(ratingRef, { isLike });
+    } catch (error) {
+      console.error('Error updating doctor rating:', error);
+      throw new Error('Failed to update doctor rating');
+    }
+  }
+  
+  async getDoctorRatings(doctorId: string): Promise<DoctorRating[]> {
+    try {
+      const ratingsRef = collection(this.firestore, 'doctorRatings');
+      const q = query(ratingsRef, where('doctorId', '==', doctorId));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as DoctorRating[];
+    } catch (error) {
+      console.error('Error fetching doctor ratings:', error);
+      throw new Error('Failed to fetch doctor ratings');
+    }
+  }
+  
+  async getUserRating(doctorId: string, userId: string): Promise<DoctorRating | null> {
+    try {
+      const ratingsRef = collection(this.firestore, 'doctorRatings');
+      const q = query(
+        ratingsRef, 
+        where('doctorId', '==', doctorId),
+        where('userId', '==', userId)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) return null;
+      
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as DoctorRating;
+    } catch (error) {
+      console.error('Error fetching user rating:', error);
+      throw new Error('Failed to fetch user rating');
+    }
+  }
+  
+  async addDoctorComment(commentData: DoctorCommentWithoutId): Promise<string> {
+    try {
+      const docRef = await addDoc(
+        collection(this.firestore, 'doctorComments'),
+        commentData
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding doctor comment:', error);
+      throw new Error('Failed to add doctor comment');
+    }
+  }
+  
+  async getDoctorComments(doctorId: string): Promise<DoctorComment[]> {
+    try {
+      const commentsRef = collection(this.firestore, 'doctorComments');
+      const q = query(
+        commentsRef, 
+        where('doctorId', '==', doctorId),
+        where('isDoctorReply', '==', false)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as DoctorComment[];
+    } catch (error) {
+      console.error('Error fetching doctor comments:', error);
+      throw new Error('Failed to fetch doctor comments');
+    }
+  }
+  
+  async getDoctorCommentReplies(commentId: string): Promise<DoctorComment[]> {
+    try {
+      const repliesRef = collection(this.firestore, 'doctorComments');
+      const q = query(
+        repliesRef, 
+        where('parentCommentId', '==', commentId),
+        where('isDoctorReply', '==', true)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as DoctorComment[];
+    } catch (error) {
+      console.error('Error fetching comment replies:', error);
+      throw new Error('Failed to fetch comment replies');
+    }
+  }
+  
+  async hasCompletedAppointment(userId: string, doctorId: string): Promise<boolean> {
+    try {
+      const appointmentsRef = collection(this.firestore, 'appointments');
+      const q = query(
+        appointmentsRef,
+        where('patientId', '==', userId),
+        where('doctorId', '==', doctorId),
+        where('status', '==', 'completed')
+      );
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error('Error checking completed appointments:', error);
+      throw new Error('Failed to check completed appointments');
+    }
+  }
+
+
+  async removeComment(commentId: string): Promise<void> {
+    try {
+      console.log(commentId);
+      await deleteDoc(doc(this.firestore, 'doctorComments', commentId));
+    } catch (error) {
+      console.error('Error removing comment:', error);
+      throw new Error('Failed to remove comment');
+    }
+  }
+  
+  async banUser(userId: string): Promise<void> {
+    try {
+      const userRef = doc(this.firestore, 'users', userId);
+      await updateDoc(userRef, { isBanned: true });
+    } catch (error) {
+      console.error('Error banning user:', error);
+      throw new Error('Failed to ban user');
+    }
+  }
+  async unBanUser(userId: string): Promise<void> {
+    try {
+      const userRef = doc(this.firestore, 'users', userId);
+      await updateDoc(userRef, { isBanned: false });
+    } catch (error) {
+      console.error('Error unbanning user:', error);
+      throw new Error('Failed to unban user');
+    }
+  }
+
+  async isUserBanned(userId: string): Promise<boolean> {
+  try {
+    const userDoc = await getDoc(doc(this.firestore, 'users', userId));
+    return userDoc.exists() ? (userDoc.data() as User).isBanned || false : false;
+  } catch (error) {
+    console.error('Error checking user ban status:', error);
+    throw new Error('Failed to check user ban status');
+  }
+}
 }

@@ -1,25 +1,25 @@
 form {
-    max-width: 600px; // Limit form width
-    margin: 0 auto; // Center align the form
-    background-color: #f8f9fa; // Light gray background
-    border: 1px solid #dee2e6; // Border for definition
-    border-radius: 8px; // Rounded corners
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Subtle shadow
+    max-width: 600px; 
+    margin: 0 auto; 
+    background-color: #f8f9fa; 
+    border: 1px solid #dee2e6;
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   
     h2 {
-      color: #343a40; // Dark heading color
+      color: #343a40;
     }
   
     .form-group {
       label {
-        font-weight: 500; // Semi-bold labels
+        font-weight: 500; 
       }
   
       input {
-        border-radius: 6px; // Round input corners
+        border-radius: 6px; 
         &:focus {
           outline: none;
-          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); // Blue focus shadow
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
         }
       }
     }
@@ -27,7 +27,7 @@ form {
     .btn {
       transition: all 0.2s ease;
       &:hover {
-        background-color: #0056b3; // Darker hover state for button
+        background-color: #0056b3; 
         border-color: #004085;
       }
     }

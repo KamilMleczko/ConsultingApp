@@ -53,7 +53,6 @@
     </div>
   }
 
-  <!-- Users list -->
   <div class="space-y-4">
     @if (users().length === 0) {
       <p class="text-center text-gray-500">No users found</p>
@@ -71,6 +70,7 @@
                 <p class="text-sm">Specialization: {{ user.specialization }}</p>
               }
               <p class="text-sm">Phone: {{ user.phoneNumber || 'Not provided' }}</p>
+              <p class="text-sm fw-bold">Banned: {{ user.isBanned ? 'Yes' : 'No' }}</p>
             </div>
           </div>
           <button 
@@ -79,6 +79,18 @@
             [disabled]="(loading$ | async) === true">
             Remove User
           </button>
+           @if(user.isBanned){
+             <button class="btn btn-warning mx-2"
+            (click)="unBanUser(user.id)"
+            [disabled]="(loading$ | async) === true"
+            >Unban User</button>
+           }
+           @else {
+            <button class="btn btn-warning mx-2"
+            (click)="banUser(user.id)"
+            [disabled]="(loading$ | async) === true"
+            >Ban User</button>
+           }
         </div>
       }
     }

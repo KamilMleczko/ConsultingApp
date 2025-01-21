@@ -41,7 +41,6 @@ export class RegisterComponent {
     if (this.registerForm.valid) {
       const formData = this.registerForm.getRawValue();
       
-      // Create base user data without specialization
       const baseUserData = {
         email: formData.email,
         displayName: formData.displayName,
@@ -51,6 +50,7 @@ export class RegisterComponent {
         phoneNumber: formData.phoneNumber || '',
         age: formData.age,
         sex: formData.sex as Sex,
+        isBanned: false
       };
 
       const userData: Omit<User, 'createdAt'> = 

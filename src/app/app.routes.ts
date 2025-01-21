@@ -8,6 +8,7 @@ import { AdminPanelComponent } from './components/admin-panel/admin-panel.compon
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { GuardService } from './services/guard-service/guard.service';
+import { DoctorsListComponent } from './components/doctors-list/doctors-list.component';
 
 export const routes: Routes = [
     { path: '', component: HomePageComponent},
@@ -16,5 +17,6 @@ export const routes: Routes = [
     { path: 'admin-panel' , component: AdminPanelComponent, canActivate: [GuardService]},
     { path: 'login', component: LoginComponent, canActivate: [GuardService]},
     { path: 'register', component: RegisterComponent, canActivate: [GuardService]},
+    { path: 'doctors-list', component: DoctorsListComponent, canActivate: [GuardService]},
     { path: '**', component: PageNotFoundComponent} 
 ];

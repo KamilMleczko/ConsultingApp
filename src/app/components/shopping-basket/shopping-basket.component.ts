@@ -79,7 +79,7 @@ export class ShoppingBasketComponent  implements OnInit{
     this.error = null;
 
     try {
-      this.appointments = await this.dbFacade.getAppointmentsByPatientId(this.authService.firebaseAuth.currentUser?.uid);//'default-user-id'
+      this.appointments = await this.dbFacade.getAppointmentsByPatientId(this.authService.firebaseAuth.currentUser?.uid);
       this.appointments.sort((a, b) => a.dateTime.toDate().getTime() - b.dateTime.toDate().getTime());
     } catch (error) {
       this.error = 'Failed to load appointments';
@@ -95,7 +95,6 @@ export class ShoppingBasketComponent  implements OnInit{
 
   processPayment() {
     if (this.paymentForm.valid) {
-      //mock payment process
       console.log('Processing payment:', {
         method: this.paymentForm.value.paymentMethod,
         amount: this.getTotalCost(),

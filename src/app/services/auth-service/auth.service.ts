@@ -49,7 +49,7 @@ export class AuthService {
             this.firebaseAuth,
             email, 
             password
-        ).then(() => {}); //return converted to void observable(we dont need the response)
+        ).then(() => {}); 
         return from(promise);
         
     }

@@ -38,6 +38,6 @@ export class PatientButtonsComponent implements OnInit {
 
   getSelectedDoctorName(): string {
     const doctor = this.doctors.find(d => d.id === this.selectedDoctorId);
-    return doctor ? `${doctor.RealName} ${doctor.RealSurname} - ${doctor.specialization}` : '--none--';
+    return doctor ? `${doctor.RealName} ${doctor.RealSurname} - ${doctor.specialization}` : 'choose doctor';
   }
 }

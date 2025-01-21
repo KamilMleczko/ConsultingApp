@@ -12,6 +12,7 @@ export interface User {
     createdAt: Timestamp;
     age: number;
     sex: Sex;
+    isBanned: boolean;
   }
 
   export interface UserWithId {
@@ -26,6 +27,7 @@ export interface User {
     createdAt: Timestamp;
     age: number;
     sex: Sex;
+    isBanned: boolean;
   }
 
   export interface TimeRange {
@@ -91,3 +93,39 @@ export interface AppointmentWithoutId {
 export type AppointmentType = 'first' | 'follow-up'| 'control' ;
 export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
 export type Sex = 'male' | 'female' | 'other';
+
+export interface DoctorRating {
+  id: string;
+  doctorId: string;
+  userId: string;
+  isLike: boolean;
+  createdAt: Timestamp;
+}
+
+export interface DoctorComment {
+  id: string;
+  doctorId: string;
+  userId: string;
+  content: string;
+  createdAt: Timestamp;
+  userDisplayName: string;
+  parentCommentId?: string; 
+  isDoctorReply?: boolean;
+}
+
+export interface DoctorRatingWithoutId {
+  doctorId: string;
+  userId: string;
+  isLike: boolean;
+  createdAt: Timestamp;
+}
+
+export interface DoctorCommentWithoutId {
+  doctorId: string;
+  userId: string;
+  content: string;
+  createdAt: Timestamp;
+  userDisplayName: string;
+  parentCommentId?: string;
+  isDoctorReply?: boolean;
+}

@@ -12,11 +12,15 @@
 
               @if (authService.currentUserSig()?.role == "admin"){
                 <li  class="nav-item">
-                  <a routerLink="/admin-panel" routerLinkActive="active" ariaCurrentWhenActive="page">Database</a>
+                  <a routerLink="/admin-panel" routerLinkActive="active" ariaCurrentWhenActive="page">Admin Panel</a>
                 </li>
               }
               <li class="nav-item">
-                <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" ariaCurrentWhenActive="page">Home Page</a>
+                <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                 ariaCurrentWhenActive="page">Home Page</a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/doctors-list" routerLinkActive="active" ariaCurrentWhenActive="page">Our Doctors</a>
               </li>
               @if (authService.currentUserSig()){
               <li class="nav-item">

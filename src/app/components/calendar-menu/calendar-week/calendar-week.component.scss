@@ -23,7 +23,6 @@
   width: 40px;
   position: relative;
   padding: 0 10px;
-  //border-right: 1px solid #dee2e6;
   font-size: 0.9rem;
   vertical-align: middle !important;
 }
@@ -139,7 +138,7 @@ td {
       background-color: #b915a6 !important; 
     }
   }
-
+  
   &.completed {
     background-color: #96b296; 
   }

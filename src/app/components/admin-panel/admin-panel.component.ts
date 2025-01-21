@@ -125,6 +125,7 @@ export class AdminPanelComponent implements OnInit {
         phoneNumber: formData.phoneNumber || '',
         age: formData.age,
         sex: formData.sex as Sex,
+        isBanned: false
       };
 
       // Add specialization only for doctors
@@ -159,6 +160,24 @@ export class AdminPanelComponent implements OnInit {
       this.showSuccess(`Authentication persistence changed to ${type}`);
     } catch (error) {
       this.showError('Error changing persistence state');
+    }
+  }
+
+  async banUser(userId: string) {
+    try {
+      await this.dbFacade.banUser(userId);
+      this.showSuccess('User banned successfully');
+    } catch (error) {
+      this.showError('Error banning user');
+    }
+  }
+
+  async unBanUser(userId: string) {
+    try {
+      await this.dbFacade.unBanUser(userId);
+      this.showSuccess('User unbanned successfully');
+    } catch (error) {
+      this.showError('Error unbanning user');
     }
   }
 

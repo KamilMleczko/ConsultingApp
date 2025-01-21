@@ -28,18 +28,22 @@
               [class.cancelled]="daySlot.appointment?.status === 'cancelled' && !daySlot.available"
               [class.outdated]="daySlot.outdated"
               [class.follow-up]="daySlot.appointment?.type === 'follow-up' "
-              [class.first] = "daySlot.appointment?.type === 'first'"
-              [class.control] = "daySlot.appointment?.type === 'control'"
+              [class.first]="daySlot.appointment?.type === 'first'"
+              [class.control]="daySlot.appointment?.type === 'control'"
               [attr.data-time]="daySlot.time"
               [attr.data-day]="daySlot.day"
               [attr.data-date]="daySlot.date"
               (click)="onCellClick(daySlot)"
               [title]="daySlot.appointment ? 
+              'Patient: ' + daySlot.patientName + ' ' + daySlot.patientSurname + '\n' +
               'Type: ' + daySlot.appointment.type + '\n' +
               'Time: ' + daySlot.appointment.timeRange.start + ' - ' + daySlot.appointment.timeRange.end + '\n' +
               'Duration: ' + daySlot.appointment.duration + ' min' +
               (daySlot.appointment.notes ? '\nNotes: ' + daySlot.appointment.notes : '')
               : ''">
+              @if(daySlot.isUsersAppointment == true){
+              <div class="text-center ">your appointment</div>
+              }
           </td>
         </tr>
       </tbody>

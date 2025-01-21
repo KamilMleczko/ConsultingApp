@@ -1,0 +1,122 @@
+<app-navbar></app-navbar>
+<div class=" p-4  " id="doctors-list">
+    <div class="grid gap-6">
+        <div *ngFor="let doctor of doctors" class="rounded-lg shadow-md p-6 w-full gap-3 mt-5 border-dark rounded " id="doctor-card" >
+            <div class ="d-flex flex-row m-2 ">
+                <!-- Doctor Image -->
+                <div class="flex-shrink-0">
+                    <img src="data:image/jpeg;base64,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"
+                     alt="Doctor placeholder" class="doctor-img"/>
+                </div>
+                 <!-- Description -->
+                <div class="mt-3">
+                    <h3 class="font-bold mx-2">
+                        Dr. {{doctor.RealName}} {{doctor.RealSurname}} - {{doctor.specialization}}
+                    </h3>
+                    <p class="mx-2"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas quam ipsam magnam dicta harum, animi aliquid laudantium unde quia doloremque veritatis voluptas dolorem ducimus pariatur asperiores, eum saepe dolorum? Sequi dolor, ratione neque, quaerat dolores id quos dolorem totam, maiores error nulla cum iure delectus eveniet excepturi deleniti? Ut, voluptatem?</p>    
+                </div>
+                
+                <!-- Rating Buttons -->
+                <div class="flex space-x-4 ">
+                    <button 
+                      (click)="handleRating(doctor.id, true)"
+                      class="flex items-center space-x-2 px-4 py-2 mt-4 rounded-full"
+                      [class.positive]="getUserRating(doctor.id)?.isLike"
+                    >
+                      <span>👍</span>
+                      <span>{{getLikes(doctor.id)}}</span>
+                    </button>
+                    <button
+                      (click)="handleRating(doctor.id, false)"
+                      class="flex items-center space-x-2 px-4 py-2 rounded-full"
+                      [class.negative]="getUserRating(doctor.id)?.isLike === false"
+                    >
+                      <span>👎</span>
+                      <span>{{getDislikes(doctor.id)}}</span>
+                    </button>               
+                 </div>
+                 <!-- End of Rating Buttons -->
+            </div>
+
+            <!-- Comments Section -->
+          <div class="mt-8 mx-4 w-full">
+            <h3 class="m-4">Comments:</h3>
+            
+            <!-- Add Comment -->
+            <div *ngIf="canComment(doctor.id)" class="mx-4 w-full d-flex align-items-center gap-5">
+              <textarea 
+                [(ngModel)]="newComments[doctor.id]"
+                class="w-full p-3 mb-2 text-white"
+                placeholder="Write a comment..."
+                rows="5"
+                cols="120"
+                id="commentInput"
+              ></textarea>
+
+              <button
+                (click)="addComment(doctor.id)"
+                id="addCommentButton"
+              >
+                Add Comment
+              </button>
+            </div>
+
+            <!-- Comments List -->
+            <div class="space-y-4 m-2 ">
+              <div *ngFor="let comment of getComments(doctor.id)" class=" p-4 mx-3 mb-3" id="comment">
+
+                    <div class="d-inline-flex gap-2">
+                        <p class="fw-bold ">{{comment.userDisplayName}}</p>
+                        
+                        <p class="">
+                            {{comment.createdAt.toDate() | date:'medium'}}
+                        </p>
+                        <div *ngIf="isAdmin()" class="d-flex gap-2">
+                            <button class="btn btn-danger btn-sm" (click)="removeComment(comment.id)">Remove</button>
+                            <button class="btn btn-warning btn-sm" (click)="banUser(comment.userId)">Ban User</button>
+                        </div>
+                    </div>
+
+                    <p id="commentContent" class="mt-2">{{comment.content}}</p>
+
+                    <!-- Doctor Reply -->
+                    <div *ngIf="isCurrentDoctor(doctor.id) && !getReplies(comment.id).length" class="mt-1 d-flex align-items-center gap-5">
+                    <textarea
+                        [(ngModel)]="replyContents[comment.id]"
+                        class="w-full p-2 border  rounded"
+                        placeholder="Write a reply..."
+                        rows="3"
+                        cols="100"
+                        id="commentInput"
+                    ></textarea>
+                    <button
+                        (click)="addReply(doctor.id, comment.id)"
+                        class="px-3 py-1"
+                        id="addCommentButton"
+                    >
+                        Reply
+                    </button>
+                    </div>
+
+                    <!-- Show Replies -->
+                    <div *ngFor="let reply of getReplies(comment.id)" class="mt-4 ml-8 p-3" id="comment">
+                    <div class="d-flex flex-row gap-2">
+                        <p class="fw-bold">Dr. {{doctor.RealName}} {{doctor.RealSurname}}</p>
+                        <p class="text-gray-500">
+                        {{reply.createdAt.toDate() | date:'medium'}}
+                        </p>
+
+                        <div *ngIf="isAdmin()" class="d-flex gap-2">
+                            <button class="btn btn-danger btn-sm" (click)="removeComment(reply.id)">Remove</button>
+                            <button class="btn btn-warning btn-sm" (click)="banUser(reply.userId)">Ban User</button>
+                        </div>
+                    </div>
+                    <p class="mt-2">{{reply.content}}</p>
+                    </div>
+              </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<app-footer></app-footer>

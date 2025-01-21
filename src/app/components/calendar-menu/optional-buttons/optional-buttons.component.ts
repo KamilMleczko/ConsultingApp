@@ -76,12 +76,10 @@ export class OptionalButtonsComponent {
           const periodStart = period.startDate.toDate();
           const periodEnd = period.endDate.toDate();
           
-          
-          //if dates overlap
           if (
-            (startDate <= periodEnd && startDate >= periodStart) || // New start date falls within existing period
-            (endDate <= periodEnd && endDate >= periodStart) || // New end date falls within existing period
-            (startDate <= periodStart && endDate >= periodEnd)// New period completely encompasses existing period
+            (startDate <= periodEnd && startDate >= periodStart) || 
+            (endDate <= periodEnd && endDate >= periodStart) ||
+            (startDate <= periodStart && endDate >= periodEnd)
           ) {
             return true; 
           }
@@ -239,15 +237,13 @@ export class OptionalButtonsComponent {
       const startDate = new Date(formValue.startDate!);
       const endDate = new Date(formValue.endDate!);
   
-      //find the current schedule
       const schedule = this.schedules.find(s => s.id === this.currentScheduleId);
       if (!schedule) {
         alert('Schedule not found');
         return;
       }
   
-      //check if exception dates are within schedule period
-      const schedulePeriod = schedule.schedulePeriods[0]; // currently always one element
+      const schedulePeriod = schedule.schedulePeriods[0];
       const scheduleStart = schedulePeriod.startDate.toDate();
       const scheduleEnd = schedulePeriod.endDate.toDate();
   
@@ -256,8 +252,7 @@ export class OptionalButtonsComponent {
         alert('Exception dates must be within the schedule period');
         return;
       }
-  
-      //check for overlap with existing exceptions
+
       const hasOverlap = schedule.exceptions.some(existing => 
         this.doExceptionsOverlap(
           startDate,
@@ -303,12 +298,10 @@ export class OptionalButtonsComponent {
     this.showExceptionsList = !this.showExceptionsList;
     if (this.showExceptionsList && this.authService.firebaseAuth.currentUser) {
       try {
-        //fetch schedules if not already loaded
         if (this.schedules.length === 0) {
           this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         }
         
-        //transform schedules data to get exceptions
         this.allExceptions = this.schedules
           .filter(schedule => schedule.exceptions.length > 0)
           .map(schedule => ({
@@ -349,10 +342,8 @@ export class OptionalButtonsComponent {
           endDate: Timestamp.fromDate(exception.endDate)
         });
         
-        //refresh the schedules and exceptions lists
         this.schedules = await this.dbFacade.getDoctorSchedules(this.authService.firebaseAuth.currentUser.uid);
         
-        //update allExceptions array
         this.allExceptions = this.schedules
           .filter(schedule => schedule.exceptions.length > 0)
           .map(schedule => ({

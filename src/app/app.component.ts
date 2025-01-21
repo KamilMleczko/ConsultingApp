@@ -37,7 +37,6 @@ export class AppComponent implements OnInit {
           this.authService.currentUserSig.set(null);
         }
       } else {
-        //User is signed out
         this.authService.currentUserSig.set(null);
       }
     });
