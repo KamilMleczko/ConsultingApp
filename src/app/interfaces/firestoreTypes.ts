@@ -75,7 +75,7 @@ export interface Appointment {
     dateTime: Timestamp; //np. 2022-12-31T12:00:00.000Z
     timeRange: TimeRange; //np. {start: '12:00', end: '13:00'}
     duration: number;
-    status: AppointmentStatus
+    status: AppointmentStatus;
     type: AppointmentType;
     notes?: string;
 }

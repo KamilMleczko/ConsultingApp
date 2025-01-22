@@ -42,7 +42,7 @@
                  <a (click) = "logout()">Logout</a>
                 </li>
               }
-              @if (authService.currentUserSig() && authService.currentUserSig()?.role !== "doctor" ){
+              @if (authService.currentUserSig() && authService.currentUserSig()?.role == "patient"  ){
                 <li  class="shopping-basket">
                   <a routerLink="/shopping-basket" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-basket2-fill" style="font-size: 1em"></i></a>
                 </li>

@@ -10,7 +10,7 @@ import { DataBaseFacadeService } from '../../../services/data-base-facade-servic
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth-service/auth.service';
-
+import { CommunicationService } from '../../../services/communication-service/communication.service';
 
 interface TimeSlot {
   time: string;
@@ -53,7 +53,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   schedules: DoctorSchedule[] = [];
   private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
-
+  private communicationService = inject(CommunicationService);
   currentSchedule: WeeklySchedule | null = null;
 
   showAppointmentForm = false;
@@ -78,21 +78,50 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     await this.updateScheduleForCurrentWeek(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
     await this.generateTimeSlots(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
     }
+
+    //for regenerating calendar after changes via additional-buttons component
+    this.communicationService.functionCalled$.subscribe(() => {
+      this.handleFunctionCall();
+    });
+  }
+
+  private async handleFunctionCall() {
+    try {
+      if ((this.authService.currentUserSig()?.role == "doctor")
+        && this.authService.firebaseAuth.currentUser){ 
+        await this.updateScheduleForCurrentWeek(this.authService.firebaseAuth.currentUser.uid);
+        await this.generateTimeSlots(this.authService.firebaseAuth.currentUser.uid);
+      }
+      else if (!this.receivedDoctorId || this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, '') === ''){ 
+        await this.updateScheduleForCurrentWeek('');
+        await this.generateTimeSlots('');
+      }
+      else{ 
+      await this.updateScheduleForCurrentWeek(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
+      await this.generateTimeSlots(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
+      }
+    } catch (error) {
+      console.error("Error handling function call:", error);
+    }
   }
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['receivedDate'] && !changes['receivedDate'].firstChange ) {
-      console.log('Received date changed:', changes['receivedDate'].currentValue);
       this.currentDate = new Date(changes['receivedDate'].currentValue);
-      if (this.receivedDoctorId === undefined || this.receivedDoctorId.toString() === ''){
-        await this.updateScheduleForCurrentWeek('');
-        await this.generateTimeSlots('');
-      }else{
+      if (!this.receivedDoctorId || this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, '') === ''){
+        if (this.authService.currentUserSig()?.role == "doctor" && this.authService.firebaseAuth.currentUser){ //its doctor view (does not use choose doctor button)
+          await this.updateScheduleForCurrentWeek(this.authService.firebaseAuth.currentUser.uid);
+          await this.generateTimeSlots(this.authService.firebaseAuth.currentUser.uid);
+        }
+        else{//its unlogged user
+          await this.updateScheduleForCurrentWeek('');
+          await this.generateTimeSlots('');
+        }
+      }else{//logged user tries to dsiplay doctor schedule
         await this.updateScheduleForCurrentWeek(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
         await this.generateTimeSlots(this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, ''));
       }
     }
     else if ( changes['receivedDoctorId'] && !changes['receivedDoctorId'].firstChange){
-      console.log('Received doctorId changed:', changes['receivedDoctorId'].currentValue);
       await this.updateScheduleForCurrentWeek(changes['receivedDoctorId'].currentValue);
       await this.generateTimeSlots(changes['receivedDoctorId'].currentValue);
     }
@@ -105,13 +134,11 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     if (doctorId === ''){
-      console.log('No doctorId');
       this.schedules = [];
       this.currentSchedule = null;
       return;
     } 
     try {
-      console.log(doctorId.toString());
       const schedulesRef = collection(this.firestore, 'doctorSchedules');
       const q = query(schedulesRef, where('doctorId', '==', doctorId));
       const querySnapshot = await getDocs(q);
@@ -315,7 +342,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       const dayAppointments = await this.dbFacade.getAppointmentsForDay(doctorId, currentDate);
       appointments.push(...dayAppointments);
     }
-    console.log('Appointments:', appointments.length);
     this.appointments = appointments;
   }
 
@@ -348,9 +374,7 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
   async onCellClick(daySlot: DaySlot): Promise<void> {
     if (this.authService.currentUserSig()?.role === 'doctor' || this.authService.currentUserSig()?.role === 'admin') return; 
 
-    console.log('Is availible ', daySlot.available);
     if (daySlot.appointment?.status === 'scheduled' && daySlot.appointment?.patientId === this.authService.firebaseAuth.currentUser?.uid ) {
-      console.log('Is appointemnt');
       if (confirm('Do you want to cancel this appointment?') ) {
         await this.dbFacade.removeAppointment(daySlot.appointment.id!);
         daySlot.appointment = undefined;
@@ -378,7 +402,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
        this.authService.currentUserSig()?.role == 'patient' &&
        this.receivedDoctorId !== undefined &&
        this.receivedDoctorId.toString().replace(/^\[Input Signal: /, '').replace(/\]$/, '') !== '') {
-      console.log('Submit appointment');
       const slotDate = this.getDayDateForException(this.currentSlot.day);
       const [hours, minutes] = this.currentSlot.time.split(':').map(Number);
       slotDate.setHours(hours, minutes, 0, 0);
@@ -464,9 +487,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
 
 
   async isUsersAppointment(appointment: Appointment): Promise<boolean> {
-    if (this.authService.currentUserSig()){
-      console.log('Current user role: ', this.authService.currentUserSig()?.role);
-    }
     return this.authService.currentUserSig()?.role === 'patient' && 
            this.authService.firebaseAuth.currentUser?.uid === appointment.patientId;
   }

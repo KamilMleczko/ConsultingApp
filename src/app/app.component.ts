@@ -28,7 +28,6 @@ export class AppComponent implements OnInit {
           const userData = await this.dbFacade.getUserById(user.uid);
           if (userData) {
             this.authService.currentUserSig.set(userData);
-            console.log('User data:', userData);
           } else {
             this.authService.currentUserSig.set(null);
           }

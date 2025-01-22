@@ -17,8 +17,23 @@ export class AuthService {
     user$ = user(this.firebaseAuth);
     currentUserSig = signal<User | null | undefined>(undefined);
    
+    private readonly persistenceMap = {
+      'LOCAL': browserLocalPersistence,
+      'SESSION': browserSessionPersistence,
+      'NONE': inMemoryPersistence
+    };
+   
+    constructor() {
+      const globalPersistence = typeof window !== 'undefined' ? localStorage?.getItem('authPersistence') as 'LOCAL' | 'SESSION' | 'NONE' || 'LOCAL' : null;
+      if (globalPersistence) {
+        this.setPersistence(globalPersistence);
+      }
+    }
 
-    
+    async setPersistence(persistenceType: 'LOCAL' | 'SESSION' | 'NONE'): Promise<void> {
+      await this.firebaseAuth.setPersistence(this.persistenceMap[persistenceType]);
+      localStorage.setItem('authPersistence', persistenceType);
+    }
 
     register(
         email: string,
@@ -60,16 +75,7 @@ export class AuthService {
         return from(promise);
     }
 
-    async setPersistence(persistenceType: 'LOCAL' | 'SESSION' | 'NONE'): Promise<void> {
-      const persistenceMap = {
-        'LOCAL': browserLocalPersistence,
-        'SESSION': browserSessionPersistence,
-        'NONE': inMemoryPersistence
-      };
-      
-      await this.firebaseAuth.setPersistence(persistenceMap[persistenceType]).then(() => {
-      });
-    }
+    
   
     
 }

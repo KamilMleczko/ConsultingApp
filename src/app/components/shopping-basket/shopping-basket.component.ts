@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { inject ,OnInit} from '@angular/core';
 import { FooterComponent } from '../home-page/footer/footer.component';
 import { AuthService } from '../../services/auth-service/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-shopping-basket',
@@ -20,6 +21,7 @@ export class ShoppingBasketComponent  implements OnInit{
   private dbFacade = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
   appointments: Appointment[] = [];
   loading = false;
   error: string | null = null;
@@ -68,6 +70,7 @@ export class ShoppingBasketComponent  implements OnInit{
       }
 
       this.paymentForm.updateValueAndValidity();
+      this.cdr.detectChanges(); // Notify Angular about the change
     });
   }
 

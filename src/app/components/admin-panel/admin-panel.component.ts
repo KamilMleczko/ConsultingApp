@@ -27,14 +27,25 @@ export class AdminPanelComponent implements OnInit {
 
   persistenceOptions = ['LOCAL', 'SESSION', 'NONE'] as const;
   currentPersistence = signal<typeof this.persistenceOptions[number]>('LOCAL');
-  constructor() {
-    const storedPersistence = typeof window !== 'undefined' ? 
-      localStorage?.getItem('authPersistence') as typeof this.persistenceOptions[number] : null;
-    
-    if (storedPersistence && this.persistenceOptions.includes(storedPersistence)) {
-      this.currentPersistence.set(storedPersistence);
-    }
-  }
+
+ constructor() {
+   const storedPersistence = localStorage?.getItem('authPersistence') as typeof this.persistenceOptions[number];
+   if (storedPersistence && this.persistenceOptions.includes(storedPersistence)) {
+     this.currentPersistence.set(storedPersistence);
+   }
+ }
+
+ async changePersistence(type: typeof this.persistenceOptions[number]) {
+   try {
+     await this.authService.setPersistence(type);
+     this.currentPersistence.set(type);
+     this.showSuccess(`Authentication persistence changed to ${type}`);
+   } catch (error) {
+     this.showError('Error changing persistence state');
+   }
+ }
+
+  
 
   fb = inject(FormBuilder);
   router = inject(Router);
@@ -94,6 +105,7 @@ export class AdminPanelComponent implements OnInit {
     } catch (error) {
       this.showError('Error removing user');
     }
+    this.loadUsers();
   }
 
   async clearDatabase(): Promise<void> {
@@ -152,17 +164,6 @@ export class AdminPanelComponent implements OnInit {
     alert(message);
   }
 
-  async changePersistence(type: typeof this.persistenceOptions[number]) {
-    try {
-      await this.authService.setPersistence(type);
-      this.currentPersistence.set(type);
-      localStorage.setItem('authPersistence', type);
-      this.showSuccess(`Authentication persistence changed to ${type}`);
-    } catch (error) {
-      this.showError('Error changing persistence state');
-    }
-  }
-
   async banUser(userId: string) {
     try {
       await this.dbFacade.banUser(userId);
@@ -170,6 +171,7 @@ export class AdminPanelComponent implements OnInit {
     } catch (error) {
       this.showError('Error banning user');
     }
+    this.loadUsers();
   }
 
   async unBanUser(userId: string) {
@@ -179,6 +181,7 @@ export class AdminPanelComponent implements OnInit {
     } catch (error) {
       this.showError('Error unbanning user');
     }
+    this.loadUsers();
   }
 
 }

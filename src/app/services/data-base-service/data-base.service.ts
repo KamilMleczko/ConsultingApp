@@ -203,7 +203,7 @@ export class DataBaseService {
       const weeklyAvailability: WeeklySchedule = {
         [dayOfWeek]: { start: daySchedule.start, end: daySchedule.end }
       };
-  
+      console.log('Doctor ID: ', doctorId);
       const schedule: DoctorScheduleWithoutId = {
         
         doctorId,
@@ -512,17 +512,21 @@ export class DataBaseService {
     }
   }
 
-
   async removeComment(commentId: string): Promise<void> {
     try {
-      console.log(commentId);
+      const repliesRef = collection(this.firestore, 'doctorComments');
+      const repliesQuery = query(repliesRef, where('parentCommentId', '==', commentId));
+      const repliesSnapshot = await getDocs(repliesQuery);
+      
+      await Promise.all(repliesSnapshot.docs.map(doc => 
+        deleteDoc(doc.ref)
+      ));
       await deleteDoc(doc(this.firestore, 'doctorComments', commentId));
     } catch (error) {
       console.error('Error removing comment:', error);
       throw new Error('Failed to remove comment');
     }
   }
-  
   async banUser(userId: string): Promise<void> {
     try {
       const userRef = doc(this.firestore, 'users', userId);

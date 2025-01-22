@@ -31,7 +31,6 @@ export class CalendarComponent implements OnInit{
     );
     this.selectedDay = day; 
     this.daySelectedEvent.emit(selectedDate);
-    console.log(`Clicked: Day ${day}`);
   }
   ngOnInit() {
     this.generateCalendar();

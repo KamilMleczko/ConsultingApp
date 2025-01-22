@@ -124,7 +124,7 @@ export class DoctorsListComponent {
   canComment(doctorId: string): boolean {
     return !!this.authService.firebaseAuth.currentUser && 
            this.authService.currentUserSig()?.isBanned === false &&
-           this.completedAppointments[doctorId] &&
+           //this.completedAppointments[doctorId] &&
            this.authService.currentUserSig()?.role === 'patient' ;
   }
   
@@ -189,13 +189,16 @@ export class DoctorsListComponent {
     return this.authService.currentUserSig()?.role === 'admin';
   }
   
+
   async removeComment(commentId: string) {
-    console.log(commentId);
     await this.dbFacade.removeComment(commentId);
+    
     Object.keys(this.comments).forEach(doctorId => {
       this.comments[doctorId] = this.comments[doctorId].filter(c => c.id !== commentId);
     });
+    
     delete this.replies[commentId];
+    await this.loadAllData();
   }
   private showSuccess(message: string): void {
     alert(message);

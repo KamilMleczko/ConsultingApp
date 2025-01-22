@@ -20,7 +20,8 @@
                 <div class="flex space-x-4 ">
                     <button 
                       (click)="handleRating(doctor.id, true)"
-                      class="flex items-center space-x-2 px-4 py-2 mt-4 rounded-full"
+                      class="flex items-center space-x-2 px-4 py-2 my-2 rounded-full"
+                      id="reaction-button-like"
                       [class.positive]="getUserRating(doctor.id)?.isLike"
                     >
                       <span>👍</span>
@@ -29,6 +30,7 @@
                     <button
                       (click)="handleRating(doctor.id, false)"
                       class="flex items-center space-x-2 px-4 py-2 rounded-full"
+                      id="reaction-button-dislike"
                       [class.negative]="getUserRating(doctor.id)?.isLike === false"
                     >
                       <span>👎</span>
@@ -114,6 +116,7 @@
                     <p class="mt-2">{{reply.content}}</p>
                     </div>
               </div>
+              <div class="filler"></div>
             </div>
 
         </div>
