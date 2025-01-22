@@ -13,7 +13,7 @@ import { PatientButtonsComponent } from './patient-buttons/patient-buttons.compo
   styleUrl: './calendar-menu.component.scss'
 })
 export class CalendarMenuComponent {
-  authService  = inject(AuthService)
+  readonly authService  = inject(AuthService)
   receivedDate = new Date(); 
   receivedDoctorId = '';
   ReceiveSelectedDay(date: Date) {

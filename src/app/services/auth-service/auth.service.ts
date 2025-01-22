@@ -13,7 +13,7 @@ import { map } from 'rxjs';
 })
 export class AuthService {
     firebaseAuth = inject(Auth);
-    dbFacade = inject(DataBaseFacadeService);
+    private readonly dbFacade = inject(DataBaseFacadeService);
     user$ = user(this.firebaseAuth);
     currentUserSig = signal<User | null | undefined>(undefined);
    

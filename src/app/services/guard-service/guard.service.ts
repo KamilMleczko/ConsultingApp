@@ -20,8 +20,8 @@ export const routes: Routes = [
     providedIn: 'root'
 })
 export class GuardService implements CanActivate {
-    authService: AuthService = inject(AuthService);
-    router: Router = inject(Router);
+    private readonly authService: AuthService = inject(AuthService);
+    private readonly router: Router = inject(Router);
   
     async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
       const routeName = route.routeConfig?.path;

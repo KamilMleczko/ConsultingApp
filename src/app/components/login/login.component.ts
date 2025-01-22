@@ -11,12 +11,12 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [NavbarComponent, FooterComponent, ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss' 
 })
 export class LoginComponent {
     fb = inject(FormBuilder);
-    authService  = inject(AuthService);
-    router = inject(Router);
+    private readonly authService  = inject(AuthService);
+    private readonly router = inject(Router);
     
     loginForm = this.fb.nonNullable.group({
       email: ['', [Validators.required, Validators.email] ],

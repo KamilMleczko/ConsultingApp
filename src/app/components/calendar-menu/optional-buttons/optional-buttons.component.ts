@@ -16,8 +16,8 @@ import { CommunicationService } from '../../../services/communication-service/co
   styleUrl: './optional-buttons.component.scss'
 })
 export class OptionalButtonsComponent {
-  private dbFacade = inject(DataBaseFacadeService);
-  private firestore = inject(Firestore);
+  private readonly dbFacade = inject(DataBaseFacadeService);
+  private readonly firestore = inject(Firestore);
   private fb = inject(FormBuilder);
 
   

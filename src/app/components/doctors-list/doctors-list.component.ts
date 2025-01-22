@@ -18,7 +18,7 @@ import { FooterComponent } from "../home-page/footer/footer.component";
 })
 export class DoctorsListComponent {
   private readonly dbFacade = inject(DataBaseFacadeService);
-  private authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
 
   doctors: UserWithId[] = [];
   ratings: { [doctorId: string]: DoctorRating[] } = {};

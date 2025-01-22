@@ -48,10 +48,10 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
 
   receivedDate = input<Date>();
   receivedDoctorId = input<string>();
-  private firestore: Firestore = inject(Firestore);
-  private authService  = inject(AuthService)
+  private readonly firestore: Firestore = inject(Firestore);
+  readonly authService  = inject(AuthService)
   schedules: DoctorSchedule[] = [];
-  private dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
+  private readonly dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
   private communicationService = inject(CommunicationService);
   currentSchedule: WeeklySchedule | null = null;

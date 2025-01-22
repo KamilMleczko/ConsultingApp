@@ -15,7 +15,7 @@ export class DataBaseFacadeService {
   
   loading$ = this._loading.asObservable();
   error$ = this._error.asObservable();
-  private dbService: DataBaseService = inject(DataBaseService);
+  private readonly dbService: DataBaseService = inject(DataBaseService);
 
   async addUser(userData: Omit<User, 'createdAt'>): Promise<string> {
     this._loading.next(true);

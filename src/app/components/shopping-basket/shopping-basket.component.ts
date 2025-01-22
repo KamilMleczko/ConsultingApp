@@ -18,9 +18,9 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './shopping-basket.component.scss'
 })
 export class ShoppingBasketComponent  implements OnInit{
-  private dbFacade = inject(DataBaseFacadeService);
+  private readonly dbFacade = inject(DataBaseFacadeService);
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   appointments: Appointment[] = [];
   loading = false;
@@ -51,7 +51,6 @@ export class ShoppingBasketComponent  implements OnInit{
       const accountName = this.paymentForm.get('accountName');
       const iban = this.paymentForm.get('iban');
 
-      //reset validators
       [cardNumber, expiryDate, cvv, paypalEmail, accountName, iban].forEach(control => {
         control?.clearValidators();
         control?.updateValueAndValidity();

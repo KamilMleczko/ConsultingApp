@@ -41,9 +41,13 @@
               'Duration: ' + daySlot.appointment.duration + ' min' +
               (daySlot.appointment.notes ? '\nNotes: ' + daySlot.appointment.notes : '')
               : ''">
-              @if(daySlot.isUsersAppointment == true){
+              @if (this.authService.currentUserSig()?.role == "doctor"){
+                <div class="text-center ">{{daySlot.patientSurname}}</div>
+              }
+              @else if(daySlot.isUsersAppointment == true){
               <div class="text-center ">your appointment</div>
               }
+              
           </td>
         </tr>
       </tbody>

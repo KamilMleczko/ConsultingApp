@@ -20,8 +20,8 @@ import { User, Sex } from '../../interfaces/firestoreTypes';
 })
 export class RegisterComponent {
   fb = inject(FormBuilder);
-  authService  = inject(AuthService);
-  router = inject(Router);
+  private readonly authService  = inject(AuthService);
+  private readonly router = inject(Router);
   registerForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.pattern(/^(?=.*[A-Z])(?=.*\d).{6,}$/)]],

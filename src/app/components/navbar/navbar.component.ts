@@ -10,8 +10,8 @@ import { Router } from '@angular/router';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  authService  = inject(AuthService)
-  router = inject(Router)
+  readonly authService  = inject(AuthService)
+  private readonly router = inject(Router)
 
   logout(): void {
     if (confirm('Do you want to log out?')) {

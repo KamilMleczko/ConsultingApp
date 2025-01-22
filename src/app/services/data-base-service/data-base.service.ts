@@ -17,8 +17,7 @@ import { DoctorSchedule, User, Appointment, WeeklySchedule,
 })
 export class DataBaseService {
 
-  firestore: Firestore = inject(Firestore);
-  //TODO: WYJEBAC
+  private readonly firestore: Firestore = inject(Firestore);
   async addUser(userData: Omit<User, 'createdAt'>): Promise<string> {
     try {
       const userWithTimestamp: User = {
@@ -71,10 +70,7 @@ export class DataBaseService {
 
   async removeUser(userId: string): Promise<void> {
     try {
-      // First, check if user exists
       const userRef = doc(this.firestore, 'users', userId);
-      
-      // Delete related appointments
       const appointmentsQuery = query(
         collection(this.firestore, 'appointments'),
         where('doctorId', '==', userId)
@@ -89,14 +85,12 @@ export class DataBaseService {
         getDocs(patientAppointmentsQuery)
       ]);
 
-      // Delete doctor schedule if user is a doctor
       const scheduleQuery = query(
         collection(this.firestore, 'doctorSchedules'),
         where('doctorId', '==', userId)
       );
       const scheduleSnapshot = await getDocs(scheduleQuery);
 
-      // Perform all deletions
       const deletePromises = [
         deleteDoc(userRef),
         ...doctorAppointments.docs.map(doc => deleteDoc(doc.ref)),
@@ -111,7 +105,6 @@ export class DataBaseService {
     }
   }
 
-  // Doctor Schedule Operations
   async addDoctorSchedule(
     doctorId: string,
     scheduleData: {
@@ -160,14 +153,12 @@ export class DataBaseService {
 
   async deleteAllData() {
 
-      //delete all doctor schedules
       const doctorSchedulesCollection = collection(this.firestore, 'doctorSchedules');
       const doctorSchedulesSnapshot = await getDocs(doctorSchedulesCollection);
       doctorSchedulesSnapshot.forEach(async (scheduleDoc) => {
         await deleteDoc(doc(doctorSchedulesCollection, scheduleDoc.id));
       });
 
-      //delete all appointments
       const appointmentsCollection = collection(this.firestore, 'appointments');
       const appointmentsSnapshot = await getDocs(appointmentsCollection);
       appointmentsSnapshot.forEach(async (appointmentDoc) => {
