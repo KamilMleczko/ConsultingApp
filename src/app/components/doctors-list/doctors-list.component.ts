@@ -124,7 +124,7 @@ export class DoctorsListComponent {
   canComment(doctorId: string): boolean {
     return !!this.authService.firebaseAuth.currentUser && 
            this.authService.currentUserSig()?.isBanned === false &&
-           //this.completedAppointments[doctorId] &&
+           this.completedAppointments[doctorId] &&
            this.authService.currentUserSig()?.role === 'patient' ;
   }
   
