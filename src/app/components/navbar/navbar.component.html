@@ -22,11 +22,16 @@
               <li class="nav-item">
                 <a routerLink="/doctors-list" routerLinkActive="active" ariaCurrentWhenActive="page">Our Doctors</a>
               </li>
-              @if (authService.currentUserSig()){
+              @if (authService.currentUserSig()?.role=="patient"){
               <li class="nav-item">
                 <a routerLink="/calendar-menu" routerLinkActive="active" ariaCurrentWhenActive="page">Book Appointment</a>
               </li>
-            }
+              }
+              @else if(authService.currentUserSig()?.role=="doctor"){
+                <li class="nav-item">
+                  <a routerLink="/calendar-menu" routerLinkActive="active" ariaCurrentWhenActive="page">Your Schedule</a>
+                </li>
+              }
               @if (authService.currentUserSig() == null){
                 <li class="nav-item">
                   <a routerLink="/login" routerLinkActive="active" ariaCurrentWhenActive="page">Log In</a>

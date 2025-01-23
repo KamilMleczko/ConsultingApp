@@ -520,8 +520,21 @@ export class DataBaseService {
   }
   async banUser(userId: string): Promise<void> {
     try {
-      const userRef = doc(this.firestore, 'users', userId);
-      await updateDoc(userRef, { isBanned: true });
+      const ratingsRef = collection(this.firestore, 'doctorRatings');
+      const ratingsQuery = query(ratingsRef, where('userId', '==', userId));
+      const ratingsSnapshot = await getDocs(ratingsQuery);
+      
+      const commentsRef = collection(this.firestore, 'doctorComments');
+      const commentsQuery = query(commentsRef, where('userId', '==', userId));
+      const commentsSnapshot = await getDocs(commentsQuery);
+      
+      const deletePromises = [
+        ...ratingsSnapshot.docs.map(doc => deleteDoc(doc.ref)),
+        ...commentsSnapshot.docs.map(doc => deleteDoc(doc.ref)),
+        updateDoc(doc(this.firestore, 'users', userId), { isBanned: true })
+      ];
+      
+      await Promise.all(deletePromises);
     } catch (error) {
       console.error('Error banning user:', error);
       throw new Error('Failed to ban user');

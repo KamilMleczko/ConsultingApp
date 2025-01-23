@@ -74,7 +74,7 @@ export class DoctorsListComponent {
   
 
   async handleRating(doctorId: string, isLike: boolean) {
-    if (this.authService.firebaseAuth.currentUser && this.canRate(this.authService.firebaseAuth.currentUser.uid)){
+    if (this.authService.firebaseAuth.currentUser && this.canRate(doctorId)){
       const userId = this.authService.firebaseAuth.currentUser.uid;
       const existingRating = this.getUserRating(doctorId);
       
