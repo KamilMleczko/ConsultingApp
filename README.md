@@ -2,6 +2,8 @@
 
 Find-a-doc is a web application that allows registered users to book appointments with doctors efficiently. Built with **Angular** and **Firebase (Firestore, Firebase Auth)**, the platform ensures secure authentication, real-time data handling, and a seamless user experience. The application features an interactive calendar system, role-based access, and integrated payment options.
 
+![image alt](https://github.com/KamilMleczko/ConsultingApp/blob/master/screenshots.png?raw=true)
+
 ## Features
 
 ### Patient Features
