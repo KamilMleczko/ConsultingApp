@@ -93,7 +93,6 @@ export class AdminPanelComponent implements OnInit {
     try {
       // Remove from both Auth and Firestore
       await Promise.all([
-        //this.authService.deleteUser(userId), //TODO: DODAC USUWANIE z firebase auth
         this.dbFacade.removeUser(userId)
       ]);
       

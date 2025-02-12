@@ -5,7 +5,7 @@ import { WeeklySchedule, DoctorSchedule, SchedulePeriod,
   Appointment, AppointmentWithoutId , AppointmentStatus,
   AppointmentType
 } from '../../../interfaces/firestoreTypes';
-import { Firestore, collection, query, where, getDocs, Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from '@angular/fire/firestore';
 import { DataBaseFacadeService } from '../../../services/data-base-facade-service/data-base-facade.service';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -48,7 +48,6 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
 
   receivedDate = input<Date>();
   receivedDoctorId = input<string>();
-  private readonly firestore: Firestore = inject(Firestore);
   readonly authService  = inject(AuthService)
   schedules: DoctorSchedule[] = [];
   private readonly dbFacade: DataBaseFacadeService = inject(DataBaseFacadeService);
@@ -139,19 +138,14 @@ export class CalendarWeekComponent implements OnInit, OnChanges{
       return;
     } 
     try {
-      const schedulesRef = collection(this.firestore, 'doctorSchedules');
-      const q = query(schedulesRef, where('doctorId', '==', doctorId));
-      const querySnapshot = await getDocs(q);
       this.schedules = await this.dbFacade.getDoctorSchedules(doctorId);
       this.currentSchedule = null;
-
-      querySnapshot.forEach((doc) => {
-        const schedule = doc.data() as DoctorSchedule;
+      for (const schedule of this.schedules) {
         const applicablePeriod = this.findApplicablePeriod(schedule.schedulePeriods, monday, sunday);
         if (applicablePeriod) {
           this.currentSchedule = applicablePeriod.weeklyAvailability;
         }
-      });
+      }
     } catch (error) {
       console.error('Error fetching doctor schedule:', error);
     }

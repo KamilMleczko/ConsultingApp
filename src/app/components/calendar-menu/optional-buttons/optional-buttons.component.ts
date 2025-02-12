@@ -4,7 +4,6 @@ import { DataBaseFacadeService } from '../../../services/data-base-facade-servic
 import { Injectable, inject } from '@angular/core';
 import { WeeklySchedule , DoctorSchedule, } from '../../../interfaces/firestoreTypes';
 import { CommonModule } from '@angular/common'; 
-import { Firestore, collection, query, where, getDocs, doc } from '@angular/fire/firestore';
 import { Timestamp } from '@angular/fire/firestore';
 import { AuthService } from '../../../services/auth-service/auth.service';
 import { CommunicationService } from '../../../services/communication-service/communication.service';
@@ -17,7 +16,6 @@ import { CommunicationService } from '../../../services/communication-service/co
 })
 export class OptionalButtonsComponent {
   private readonly dbFacade = inject(DataBaseFacadeService);
-  private readonly firestore = inject(Firestore);
   private fb = inject(FormBuilder);
 
   
@@ -67,13 +65,9 @@ export class OptionalButtonsComponent {
 
   private async checkScheduleOverlap(startDate: Date, endDate: Date, doctorId: string): Promise<boolean> {
     try {
-      const schedulesRef = collection(this.firestore, 'doctorSchedules');
-      const q = query(schedulesRef, where('doctorId', '==', doctorId ));
-      const querySnapshot = await getDocs(q);
-      
-      for (const doc of querySnapshot.docs) {
-        const schedule = doc.data() as DoctorSchedule;
-        
+      const schedules = await this.dbFacade.getDoctorSchedules(doctorId);
+
+      for (const schedule of schedules) {    
         for (const period of schedule.schedulePeriods) {
           const periodStart = period.startDate.toDate();
           const periodEnd = period.endDate.toDate();

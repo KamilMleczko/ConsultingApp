@@ -527,10 +527,22 @@ export class DataBaseService {
       const commentsRef = collection(this.firestore, 'doctorComments');
       const commentsQuery = query(commentsRef, where('userId', '==', userId));
       const commentsSnapshot = await getDocs(commentsQuery);
+
+      // For each comment, get and delete its replies
+      const nestedCommentDeletions = await Promise.all(
+        commentsSnapshot.docs.map(async (commentDoc) => {
+          const repliesRef = collection(this.firestore, 'doctorComments');
+          const repliesQuery = query(repliesRef, where('parentCommentId', '==', commentDoc.id));
+          const repliesSnapshot = await getDocs(repliesQuery);
+        
+          return repliesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        })
+      );
       
       const deletePromises = [
         ...ratingsSnapshot.docs.map(doc => deleteDoc(doc.ref)),
         ...commentsSnapshot.docs.map(doc => deleteDoc(doc.ref)),
+        ...nestedCommentDeletions.flat(),
         updateDoc(doc(this.firestore, 'users', userId), { isBanned: true })
       ];
       
